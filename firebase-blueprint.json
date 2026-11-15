@@ -1,0 +1,127 @@
+{
+  "entities": {
+    "LearnerProfile": {
+      "title": "LearnerProfile",
+      "description": "Preschooler phonics profile, preferences (SATPIN vs A-Z, Hinglish vs English), and overall progress.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Firebase Auth UID of the signed-in parent/learner account."
+        },
+        "childName": {
+          "type": "string",
+          "description": "Display nickname of the young learner."
+        },
+        "preferredMode": {
+          "type": "string",
+          "enum": ["SATPIN", "AZ"],
+          "description": "Active learning path sequence."
+        },
+        "preferredLanguage": {
+          "type": "string",
+          "enum": ["HINGLISH", "ENGLISH"],
+          "description": "Active phonics audio & cue language."
+        },
+        "totalStars": {
+          "type": "integer",
+          "description": "Cumulative stars earned across phonics lessons."
+        },
+        "unlockedLevelOrder": {
+          "type": "integer",
+          "description": "Highest SATPIN order (1-26) currently unlocked."
+        },
+        "streakDays": {
+          "type": "integer",
+          "description": "Active daily learning streak."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp() on creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp() on updates."
+        }
+      },
+      "required": [
+        "userId",
+        "childName",
+        "preferredMode",
+        "preferredLanguage",
+        "totalStars",
+        "unlockedLevelOrder",
+        "streakDays",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "LetterProgress": {
+      "title": "LetterProgress",
+      "description": "Per-letter phonics mastery, stars earned, practice count, and best quiz score.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "letter": {
+          "type": "string",
+          "description": "Uppercase phonics letter A-Z."
+        },
+        "starsEarned": {
+          "type": "integer",
+          "description": "Stars earned on this letter (0-3)."
+        },
+        "mastered": {
+          "type": "boolean",
+          "description": "Whether the learner passed the letter phonics quiz."
+        },
+        "practiceCount": {
+          "type": "integer",
+          "description": "Number of interactive practice sessions completed."
+        },
+        "bestQuizScore": {
+          "type": "integer",
+          "description": "Best quiz percentage score (0-100)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp() on creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp() on updates."
+        }
+      },
+      "required": [
+        "userId",
+        "letter",
+        "starsEarned",
+        "mastered",
+        "practiceCount",
+        "bestQuizScore",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": {
+        "$ref": "#/entities/LearnerProfile"
+      },
+      "description": "Stores each authenticated family's phonics learner profile and preferences."
+    },
+    "/users/{userId}/letter_progress/{letterId}": {
+      "schema": {
+        "$ref": "#/entities/LetterProgress"
+      },
+      "description": "Stores per-letter phonics mastery and star ratings scoped to the owner user."
+    }
+  }
+}

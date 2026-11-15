@@ -1,0 +1,147 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Global default-deny safety net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isValidLearnerProfile(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.userId.size() <= 128 &&
+             data.childName is string &&
+             data.childName.size() >= 1 &&
+             data.childName.size() <= 40 &&
+             data.preferredMode is string &&
+             data.preferredMode in ['SATPIN', 'AZ'] &&
+             data.preferredLanguage is string &&
+             data.preferredLanguage in ['HINGLISH', 'ENGLISH'] &&
+             data.totalStars is int &&
+             data.totalStars >= 0 &&
+             data.totalStars <= 10000 &&
+             data.unlockedLevelOrder is int &&
+             data.unlockedLevelOrder >= 1 &&
+             data.unlockedLevelOrder <= 26 &&
+             data.streakDays is int &&
+             data.streakDays >= 0 &&
+             data.streakDays <= 3650 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    function isValidLetterProgress(data, userId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.userId.size() <= 128 &&
+             data.letter is string &&
+             data.letter.size() >= 1 &&
+             data.letter.size() <= 2 &&
+             data.letter.matches('^[A-Z]$') &&
+             data.starsEarned is int &&
+             data.starsEarned >= 0 &&
+             data.starsEarned <= 3 &&
+             data.mastered is bool &&
+             data.practiceCount is int &&
+             data.practiceCount >= 0 &&
+             data.practiceCount <= 10000 &&
+             data.bestQuizScore is int &&
+             data.bestQuizScore >= 0 &&
+             data.bestQuizScore <= 100 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+      allow list: if false;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll([
+                         'userId', 'childName', 'preferredMode', 'preferredLanguage',
+                         'totalStars', 'unlockedLevelOrder', 'streakDays', 'createdAt', 'updatedAt'
+                       ]) &&
+                       incoming().keys().hasOnly([
+                         'userId', 'childName', 'preferredMode', 'preferredLanguage',
+                         'totalStars', 'unlockedLevelOrder', 'streakDays', 'createdAt', 'updatedAt'
+                       ]) &&
+                       isValidLearnerProfile(incoming(), userId);
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       request.auth.uid == userId &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       isValidLearnerProfile(incoming(), userId) &&
+                       (
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'childName', 'preferredMode', 'preferredLanguage', 'updatedAt'
+                         ]) ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'totalStars', 'unlockedLevelOrder', 'streakDays', 'updatedAt'
+                         ]) ||
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'childName', 'preferredMode', 'preferredLanguage',
+                           'totalStars', 'unlockedLevelOrder', 'streakDays', 'updatedAt'
+                         ])
+                       );
+
+      allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+      match /letter_progress/{letterId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(letterId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(letterId) &&
+                         request.auth.uid == userId &&
+                         incoming().keys().hasAll([
+                           'userId', 'letter', 'starsEarned', 'mastered',
+                           'practiceCount', 'bestQuizScore', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'letter', 'starsEarned', 'mastered',
+                           'practiceCount', 'bestQuizScore', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidLetterProgress(incoming(), userId);
+
+        allow update: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(letterId) &&
+                         request.auth.uid == userId &&
+                         incoming().userId == existing().userId &&
+                         incoming().letter == existing().letter &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidLetterProgress(incoming(), userId) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'starsEarned', 'mastered', 'practiceCount', 'bestQuizScore', 'updatedAt'
+                         ]);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(letterId);
+      }
+    }
+  }
+}

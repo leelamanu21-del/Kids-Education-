@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">PhonicsPath</string>
+    <string name="tagline_hinglish">SATPIN Phonics • Khelo aur Seekho</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_in_subtitle">Save your little learner\'s stars, SATPIN progress, and Hinglish phonics journey safely in the cloud.</string>
+    <string name="mode_satpin">SATPIN Path</string>
+    <string name="mode_az">A - Z Order</string>
+    <string name="lang_hinglish">Hinglish</string>
+    <string name="lang_english">English</string>
+    <string name="word_blender_title">Word Blender</string>
+    <string name="word_blender_subtitle">Tap sounds &amp; blend words!</string>
+    <string name="sign_out">Sign Out</string>
+</resources>
