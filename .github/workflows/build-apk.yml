@@ -38,7 +38,7 @@ jobs:
             SDKMANAGER="$(find "$SDK_ROOT" -maxdepth 4 -type f -name sdkmanager 2>/dev/null | head -n 1 || true)"
           fi
           if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager not found under $SDK_ROOT" >&2
+            echo "::error::sdkmanager not found under $SDK_ROOT"
             exit 1
           fi
           echo "Using sdkmanager: $SDKMANAGER"
@@ -50,19 +50,54 @@ jobs:
         with:
           gradle-version: '9.3.1'
 
-      - name: Decode debug keystore
+      - name: Prepare keystore and .env
         run: |
-          if [ -f debug.keystore.base64 ] && [ ! -f debug.keystore ]; then
-            base64 --decode debug.keystore.base64 > debug.keystore
+          if [ ! -f debug.keystore ]; then
+            if [ -f debug.keystore.base64 ]; then
+              base64 --decode debug.keystore.base64 > debug.keystore
+            else
+              keytool -genkeypair -v \
+                -keystore debug.keystore \
+                -storepass android \
+                -alias androiddebugkey \
+                -keypass android \
+                -keyalg RSA \
+                -keysize 2048 \
+                -validity 10000 \
+                -dname "CN=Android Debug,O=Android,C=US"
+            fi
+          fi
+          if [ ! -f .env ]; then
+            if [ -f .env.example ]; then
+              cp .env.example .env
+            else
+              touch .env
+            fi
           fi
 
       - name: Build Debug APK
         run: |
+          set -o pipefail
+          GRADLE_CMD="gradle"
           if [ -f ./gradlew ]; then
             chmod +x ./gradlew
-            ./gradlew assembleDebug --no-daemon --stacktrace
-          else
-            gradle assembleDebug --no-daemon --stacktrace
+            GRADLE_CMD="./gradlew"
+          fi
+
+          if ! "$GRADLE_CMD" assembleDebug \
+            --no-daemon \
+            --no-configuration-cache \
+            --max-workers=2 \
+            -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" \
+            --stacktrace 2>&1 | tee gradle-build.log; then
+            echo "::error::Gradle assembleDebug failed. See build summary for details."
+            {
+              echo "### Gradle Build Failure Log"
+              echo '```text'
+              tail -n 120 gradle-build.log
+              echo '```'
+            } >> "$GITHUB_STEP_SUMMARY"
+            exit 1
           fi
 
       - name: Upload Debug APK
