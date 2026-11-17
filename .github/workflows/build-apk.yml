@@ -89,12 +89,16 @@ jobs:
             --no-configuration-cache \
             --max-workers=2 \
             -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" \
-            --stacktrace 2>&1 | tee gradle-build.log; then
-            echo "::error::Gradle assembleDebug failed. See build summary for details."
+            2>&1 | tee gradle-build.log; then
+            echo "::error::Gradle assembleDebug failed. Check the Gradle Build Failure Log in Summary."
             {
-              echo "### Gradle Build Failure Log"
+              echo "### Gradle Errors"
               echo '```text'
-              tail -n 120 gradle-build.log
+              grep -E '^(e: |FAILURE:|Execution failed|\* What went wrong:|> Task .* FAILED|> )' gradle-build.log | head -n 40 || true
+              echo '```'
+              echo "### Last 80 Log Lines"
+              echo '```text'
+              tail -n 80 gradle-build.log
               echo '```'
             } >> "$GITHUB_STEP_SUMMARY"
             exit 1
