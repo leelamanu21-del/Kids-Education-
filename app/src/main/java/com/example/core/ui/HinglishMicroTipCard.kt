@@ -25,7 +25,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -140,13 +139,8 @@ fun HinglishMicroTipCard(
 
       Column(modifier = Modifier.weight(1f)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(
-            imageVector = Icons.Rounded.Translate,
-            contentDescription = null,
-            tint = SkyTeal,
-            modifier = Modifier.size(14.dp),
-          )
-          Spacer(modifier = Modifier.width(5.dp))
+          LanguageScriptBadge(tint = SkyTeal)
+          Spacer(modifier = Modifier.width(6.dp))
           Text(
             text =
               if (languageMode == LanguageMode.HINGLISH) "Hinglish Sound Tip • Tap to Hear"

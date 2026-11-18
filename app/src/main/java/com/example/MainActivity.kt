@@ -40,6 +40,10 @@ import com.example.feature.home.HomeViewModel
 import com.example.feature.lesson.LetterLessonScreen
 import com.example.feature.parent.ParentMathGateDialog
 import com.example.feature.parent.ParentZoneScreen
+import com.example.feature.stages.Class1FluencyScreen
+import com.example.feature.stages.Class2GrammarStoryScreen
+import com.example.feature.stages.SightWordsScreen
+import com.example.feature.stages.UkgStageScreen
 import com.example.feature.timer.EyeRestBreakScreen
 import com.example.ui.theme.PhonicsPathTheme
 import com.google.firebase.Firebase
@@ -56,6 +60,10 @@ object PhonicsRoutes {
   const val HOME = "home"
   const val LESSON = "lesson/{letter}"
   const val BLENDER = "blender"
+  const val SIGHT_WORDS = "sight_words"
+  const val UKG_STAGE = "ukg_stage"
+  const val CLASS1_STAGE = "class1_stage"
+  const val CLASS2_STAGE = "class2_stage"
   const val PARENT = "parent"
 
   fun lessonRoute(letter: String): String = "lesson/${letter.uppercase()}"
@@ -203,6 +211,10 @@ private fun AuthenticatedPhonicsFlow(
           audioPlayer.speakLetterPhoneme(letter, langMode)
         },
         onOpenWordBlender = { navController.navigate(PhonicsRoutes.BLENDER) },
+        onOpenSightWords = { navController.navigate(PhonicsRoutes.SIGHT_WORDS) },
+        onOpenUkgStage = { navController.navigate(PhonicsRoutes.UKG_STAGE) },
+        onOpenClass1Stage = { navController.navigate(PhonicsRoutes.CLASS1_STAGE) },
+        onOpenClass2Stage = { navController.navigate(PhonicsRoutes.CLASS2_STAGE) },
         onOpenParentZone = { showParentMathGate = true },
         onSignOut = {
           audioPlayer.stop()
@@ -244,6 +256,50 @@ private fun AuthenticatedPhonicsFlow(
         onWordBlended = {
           timerState = timerState.copy(wordsBlendedToday = timerState.wordsBlendedToday + 1)
         },
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.SIGHT_WORDS) {
+      SightWordsScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.UKG_STAGE) {
+      UkgStageScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.CLASS1_STAGE) {
+      Class1FluencyScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.CLASS2_STAGE) {
+      Class2GrammarStoryScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
         onBack = {
           audioPlayer.stop()
           navController.popBackStack()

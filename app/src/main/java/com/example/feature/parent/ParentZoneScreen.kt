@@ -718,7 +718,7 @@ fun buildWhatsAppReportMessage(
     if (masteredLetters.isEmpty()) "Starting SATPIN Group 1 (S, A, T, P, I, N)"
     else masteredLetters.joinToString(", ")
   return buildString {
-    append("🌟 PhonicsPath Daily Report for ${profile.childName} 🌟\n")
+    append("🌟 BolBuddy Daily Report for ${profile.childName} 🌟\n")
     append("⭐ Total Stars: ${profile.totalStars}\n")
     append("🔤 Mastered Sounds (${masteredLetters.size}/26): $lettersText\n")
     append("🪄 Words Blended Today: $wordsBlendedToday\n")

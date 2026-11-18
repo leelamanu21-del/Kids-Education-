@@ -1,6 +1,6 @@
 {
-  "name": "PhonicsPath",
-  "description": "Children's phonics learning app with SATPIN sequencing, Hinglish support, interactive audio playback, and Firebase progress sync.",
+  "name": "BolBuddy",
+  "description": "BolBuddy: Modern Hinglish & English LKG to Class 2 phonics, blending, digraphs, reading fluency, and interactive learning app.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

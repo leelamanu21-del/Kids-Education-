@@ -22,6 +22,6 @@ dependencyResolutionManagement {
   }
 }
 
-rootProject.name = "PhonicsPath"
+rootProject.name = "BolBuddy"
 
 include(":app")

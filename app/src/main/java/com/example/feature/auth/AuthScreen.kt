@@ -32,7 +32,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.LockOpen
-import androidx.compose.material.icons.rounded.Translate
+import com.example.core.ui.LanguageScriptBadge
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -168,7 +168,7 @@ fun AuthScreen(
       ) {
         Image(
           painter = painterResource(id = R.drawable.img_mascot_welcome),
-          contentDescription = "PhonicsPath baby elephant mascot",
+          contentDescription = "BolBuddy baby elephant mascot",
           contentScale = ContentScale.Crop,
           modifier = Modifier.fillMaxSize(),
         )
@@ -208,8 +208,7 @@ fun AuthScreen(
           label = "SATPIN Order",
           tint = CoralPrimary,
         )
-        FeatureHighlightPill(
-          icon = Icons.Rounded.Translate,
+        LanguageHighlightPill(
           label = "Hinglish + English",
           tint = SkyTeal,
         )
@@ -345,6 +344,31 @@ private fun FeatureHighlightPill(
         tint = tint,
         modifier = Modifier.size(16.dp),
       )
+      Spacer(modifier = Modifier.width(6.dp))
+      Text(
+        text = label,
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.onBackground,
+      )
+    }
+  }
+}
+
+@Composable
+private fun LanguageHighlightPill(
+  label: String,
+  tint: Color,
+) {
+  Surface(
+    color = tint.copy(alpha = 0.14f),
+    shape = RoundedCornerShape(50),
+    modifier = Modifier.border(1.dp, tint.copy(alpha = 0.35f), RoundedCornerShape(50)),
+  ) {
+    Row(
+      modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+      verticalAlignment = Alignment.CenterVertically,
+    ) {
+      LanguageScriptBadge(tint = tint)
       Spacer(modifier = Modifier.width(6.dp))
       Text(
         text = label,

@@ -91,14 +91,12 @@ fun EyeRestBreakScreen(
     )
 
   LaunchedEffect(Unit) {
-    val spoken =
-      if (languageMode == LanguageMode.HINGLISH) {
-        "Shabaash $childName! Great job today! Ab apni aankhon ko thoda aaram dein."
-      } else {
-        "Great job today, $childName! Time to rest your eyes and play offline."
-      }
     audioPlayer.playCelebrationChime()
-    audioPlayer.speakText(spoken)
+    if (languageMode == LanguageMode.HINGLISH) {
+      audioPlayer.speakHindiCue("शाबाश $childName! Great job today! अब अपनी आँखों को थोड़ा आराम दें।")
+    } else {
+      audioPlayer.speakText("Great job today, $childName! Time to rest your eyes and play offline.")
+    }
   }
 
   Box(

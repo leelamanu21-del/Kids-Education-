@@ -53,7 +53,6 @@ import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Star
 import androidx.compose.material.icons.rounded.StarOutline
 import androidx.compose.material.icons.rounded.Timer
-import androidx.compose.material.icons.rounded.Translate
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -93,11 +92,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.core.timer.SessionTimerUiState
+import com.example.core.ui.LanguageScriptBadge
 import com.example.domain.model.LanguageMode
 import com.example.domain.model.LearningMode
 import com.example.domain.model.LetterProgress
 import com.example.domain.model.PhonicsLetter
 import com.example.domain.model.SatpinGroup
+import com.example.feature.stages.CourseRoadmapSection
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.EmptyStar
 import com.example.ui.theme.GoldStar
@@ -121,6 +122,10 @@ fun HomeLearningPathScreen(
   onLetterClick: (PhonicsLetter) -> Unit,
   onSpeakLetter: (PhonicsLetter, LanguageMode) -> Unit,
   onOpenWordBlender: () -> Unit,
+  onOpenSightWords: () -> Unit,
+  onOpenUkgStage: () -> Unit,
+  onOpenClass1Stage: () -> Unit,
+  onOpenClass2Stage: () -> Unit,
   onOpenParentZone: () -> Unit,
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
@@ -250,6 +255,18 @@ fun HomeLearningPathScreen(
                 )
               }
 
+              // 2b. LKG to Class 2 Course Path
+              item(span = { GridItemSpan(maxLineSpan) }) {
+                CourseRoadmapSection(
+                  languageMode = uiState.languageMode,
+                  onOpenSightWords = onOpenSightWords,
+                  onOpenWordBlender = onOpenWordBlender,
+                  onOpenUkgStage = onOpenUkgStage,
+                  onOpenClass1Stage = onOpenClass1Stage,
+                  onOpenClass2Stage = onOpenClass2Stage,
+                )
+              }
+
               // 3. Sequence Switcher (SATPIN vs A-Z) & Explore All Toggle
               item(span = { GridItemSpan(maxLineSpan) }) {
                 SequenceControlSection(
@@ -359,65 +376,106 @@ private fun TopLearnerHeader(
   onOpenParentZone: () -> Unit,
   onSignOut: () -> Unit,
 ) {
-  Row(
+  Column(
     modifier = Modifier.fillMaxWidth(),
-    verticalAlignment = Alignment.CenterVertically,
-    horizontalArrangement = Arrangement.SpaceBetween,
+    verticalArrangement = Arrangement.spacedBy(10.dp),
   ) {
     Row(
+      modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
-      modifier = Modifier.weight(1f),
+      horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-      Box(
-        modifier =
-          Modifier
-            .size(48.dp)
-            .clip(CircleShape)
-            .background(SoftSand)
-            .border(2.dp, SunshineAmber, CircleShape),
-        contentAlignment = Alignment.Center,
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.weight(1f),
       ) {
-        Image(
-          painter = painterResource(id = R.drawable.img_mascot_welcome),
-          contentDescription = "Learner avatar",
-          contentScale = ContentScale.Crop,
-          modifier = Modifier.fillMaxSize(),
-        )
-      }
-      Spacer(modifier = Modifier.width(10.dp))
-      Column(modifier = Modifier.weight(1f)) {
-        Text(
-          text = if (languageMode == LanguageMode.HINGLISH) "Namaste!" else "Welcome back!",
-          style = MaterialTheme.typography.labelMedium,
-          color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-        Row(verticalAlignment = Alignment.CenterVertically) {
-          Text(
-            text = childName,
-            style = MaterialTheme.typography.titleLarge,
-            color = MaterialTheme.colorScheme.onBackground,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false),
+        Box(
+          modifier =
+            Modifier
+              .size(48.dp)
+              .clip(CircleShape)
+              .background(SoftSand)
+              .border(2.dp, SunshineAmber, CircleShape),
+          contentAlignment = Alignment.Center,
+        ) {
+          Image(
+            painter = painterResource(id = R.drawable.img_mascot_welcome),
+            contentDescription = "Learner avatar",
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize(),
           )
-          IconButton(
-            onClick = onEditNameClick,
-            modifier = Modifier.minimumInteractiveComponentSize().testTag("edit_name_button"),
-          ) {
-            Icon(
-              imageVector = Icons.Rounded.Edit,
-              contentDescription = "Edit child name",
-              tint = MaterialTheme.colorScheme.onSurfaceVariant,
-              modifier = Modifier.size(18.dp),
+        }
+        Spacer(modifier = Modifier.width(10.dp))
+        Column(modifier = Modifier.weight(1f)) {
+          Text(
+            text = if (languageMode == LanguageMode.HINGLISH) "Namaste!" else "Welcome back!",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            softWrap = false,
+          )
+          Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+              text = childName,
+              style = MaterialTheme.typography.titleLarge,
+              color = MaterialTheme.colorScheme.onBackground,
+              maxLines = 1,
+              overflow = TextOverflow.Ellipsis,
+              modifier = Modifier.weight(1f, fill = false),
             )
+            IconButton(
+              onClick = onEditNameClick,
+              modifier = Modifier.minimumInteractiveComponentSize().testTag("edit_name_button"),
+            ) {
+              Icon(
+                imageVector = Icons.Rounded.Edit,
+                contentDescription = "Edit child name",
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+              )
+            }
           }
+        }
+      }
+
+      Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(6.dp),
+      ) {
+        // Secret Parent Zone Lock Button
+        IconButton(
+          onClick = onOpenParentZone,
+          modifier =
+            Modifier
+              .minimumInteractiveComponentSize()
+              .clip(CircleShape)
+              .background(PlumPurple.copy(alpha = 0.12f))
+              .testTag("open_parent_zone_button"),
+        ) {
+          Icon(
+            imageVector = Icons.Rounded.AdminPanelSettings,
+            contentDescription = "Open Parent Zone",
+            tint = PlumPurple,
+          )
+        }
+
+        IconButton(
+          onClick = onSignOut,
+          modifier = Modifier.minimumInteractiveComponentSize().testTag("sign_out_button"),
+        ) {
+          Icon(
+            imageVector = Icons.AutoMirrored.Rounded.Logout,
+            contentDescription = "Sign out",
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+          )
         }
       }
     }
 
     Row(
+      modifier = Modifier.fillMaxWidth(),
       verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(6.dp),
+      horizontalArrangement = Arrangement.spacedBy(10.dp),
     ) {
       // Total Stars Badge
       Surface(
@@ -426,7 +484,7 @@ private fun TopLearnerHeader(
         modifier = Modifier.border(1.5.dp, SunshineAmber, RoundedCornerShape(50)),
       ) {
         Row(
-          modifier = Modifier.padding(horizontal = 10.dp, vertical = 8.dp),
+          modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Icon(
@@ -435,17 +493,19 @@ private fun TopLearnerHeader(
             tint = GoldStar,
             modifier = Modifier.size(18.dp),
           )
-          Spacer(modifier = Modifier.width(4.dp))
+          Spacer(modifier = Modifier.width(5.dp))
           Text(
-            text = totalStars.toString(),
+            text = "$totalStars Stars",
             style = MaterialTheme.typography.titleMedium,
             color = InkNavy,
             fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
           )
         }
       }
 
-      // Hinglish / English Toggle Pill
+      // Hinglish / English Toggle Pill with English 'A' and Hindi 'अ'
       Surface(
         onClick = onToggleLanguage,
         color = SkyTeal.copy(alpha = 0.14f),
@@ -457,50 +517,23 @@ private fun TopLearnerHeader(
             .testTag("language_toggle_button"),
       ) {
         Row(
-          modifier = Modifier.padding(horizontal = 10.dp, vertical = 10.dp),
+          modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
-          Icon(
-            imageVector = Icons.Rounded.Translate,
-            contentDescription = "Toggle Hinglish or English",
+          LanguageScriptBadge(
             tint = SkyTeal,
-            modifier = Modifier.size(18.dp),
+            fontSize = 14.sp,
+            description = "Toggle Hinglish or English",
           )
-          Spacer(modifier = Modifier.width(4.dp))
+          Spacer(modifier = Modifier.width(8.dp))
           Text(
             text = languageMode.label,
             style = MaterialTheme.typography.labelLarge,
             color = SkyTeal,
+            maxLines = 1,
+            softWrap = false,
           )
         }
-      }
-
-      // Secret Parent Zone Lock Button
-      IconButton(
-        onClick = onOpenParentZone,
-        modifier =
-          Modifier
-            .minimumInteractiveComponentSize()
-            .clip(CircleShape)
-            .background(PlumPurple.copy(alpha = 0.12f))
-            .testTag("open_parent_zone_button"),
-      ) {
-        Icon(
-          imageVector = Icons.Rounded.AdminPanelSettings,
-          contentDescription = "Open Parent Zone",
-          tint = PlumPurple,
-        )
-      }
-
-      IconButton(
-        onClick = onSignOut,
-        modifier = Modifier.minimumInteractiveComponentSize().testTag("sign_out_button"),
-      ) {
-        Icon(
-          imageVector = Icons.AutoMirrored.Rounded.Logout,
-          contentDescription = "Sign out",
-          tint = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
       }
     }
   }
