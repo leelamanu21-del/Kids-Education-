@@ -313,7 +313,7 @@ fun AuthScreen(
           Spacer(modifier = Modifier.height(12.dp))
           Text(
             text =
-              "Tip: Sign-in uses Android's Google account sheet. On an emulator, if 2-Step SMS/Gmail OTP doesn't arrive, choose Google Prompt / Authenticator or sign into Android Settings → Google first.",
+              "1-Tap Sign-In: Select your existing Google account on this phone (no OTP needed). On a fresh emulator without an account, sign into Android Settings → Google first.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
