@@ -117,7 +117,16 @@ fun onGoogleSignInClicked(
       }
     } catch (e: GetCredentialCancellationException) {
       Log.w(TAG, "Google Sign-In flow cancelled or dismissed: ${e.message}", e)
-      onAuthCancelled()
+      val detail = (e.errorMessage?.toString() ?: e.message).orEmpty()
+      val isUserCancel =
+        detail.isBlank() ||
+          detail.contains("cancel", ignoreCase = true) ||
+          detail.contains("dismiss", ignoreCase = true)
+      if (isUserCancel) {
+        onAuthCancelled()
+      } else {
+        onAuthError("Google Sign-In could not complete: $detail")
+      }
     } catch (e: NoCredentialException) {
       Log.w(TAG, "No Google account available on device: ${e.message}", e)
       onAuthError(

@@ -51,21 +51,18 @@ jobs:
           "$SDKMANAGER" "platforms;android-36.1" "build-tools;36.0.0" "platform-tools"
 
       - name: Prepare keystore and .env
+        env:
+          DEBUG_KEYSTORE_BASE64: ${{ secrets.DEBUG_KEYSTORE_BASE64 }}
         run: |
           if [ ! -f debug.keystore ]; then
             if [ -f debug.keystore.base64 ]; then
               base64 --decode debug.keystore.base64 > debug.keystore
+            elif [ -n "$DEBUG_KEYSTORE_BASE64" ]; then
+              printf '%s' "$DEBUG_KEYSTORE_BASE64" | tr -d '[:space:]' | base64 --decode > debug.keystore
+              echo "Restored debug.keystore from DEBUG_KEYSTORE_BASE64 secret."
             else
-              echo "::warning::debug.keystore.base64 not found! Fallback keystore SHA-1 will not match Firebase Google Sign-In unless debug.keystore.base64 is committed."
-              keytool -genkeypair -v \
-                -keystore debug.keystore \
-                -storepass android \
-                -alias androiddebugkey \
-                -keypass android \
-                -keyalg RSA \
-                -keysize 2048 \
-                -validity 10000 \
-                -dname "CN=Android Debug,O=Android,C=US"
+              echo "::error::debug.keystore.base64 is missing! Push debug.keystore.base64 to GitHub OR add it as a Repository Secret named DEBUG_KEYSTORE_BASE64 so Google Sign-In SHA-1 matches Firebase."
+              exit 1
             fi
           fi
           if [ ! -f .env ]; then
