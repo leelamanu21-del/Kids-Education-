@@ -2,12 +2,16 @@ package com.example.feature.auth
 
 import android.app.Activity
 import android.content.Context
+import android.content.ContextWrapper
 import android.util.Log
 import androidx.credentials.ClearCredentialStateRequest
 import androidx.credentials.CredentialManager
 import androidx.credentials.CustomCredential
 import androidx.credentials.GetCredentialRequest
 import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.GetCredentialProviderConfigurationException
+import androidx.credentials.exceptions.NoCredentialException
 import com.example.R
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
@@ -24,6 +28,13 @@ import kotlinx.coroutines.withContext
 
 private const val TAG = "PhonicsAuth"
 
+private tailrec fun Context.findActivity(): Activity? =
+  when (this) {
+    is Activity -> this
+    is ContextWrapper -> baseContext.findActivity()
+    else -> null
+  }
+
 fun attemptAutoSignIn(
   context: Context,
   credentialManager: CredentialManager,
@@ -38,7 +49,7 @@ fun attemptAutoSignIn(
   val clientId =
     try {
       context.getString(R.string.default_web_client_id)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       onUnauthenticated()
       return
     }
@@ -54,7 +65,8 @@ fun attemptAutoSignIn(
 
   scope.launch {
     try {
-      val result = credentialManager.getCredential(context, request)
+      val activityContext = context.findActivity() ?: context
+      val result = credentialManager.getCredential(activityContext, request)
       val credential = result.credential
       if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
         val googleIdToken = GoogleIdTokenCredential.createFrom(credential.data).idToken
@@ -82,7 +94,7 @@ fun onGoogleSignInClicked(
   val clientId =
     try {
       context.getString(R.string.default_web_client_id)
-    } catch (e: Exception) {
+    } catch (_: Exception) {
       onAuthError("Google Sign-In configuration missing: default_web_client_id not found")
       return
     }
@@ -92,7 +104,7 @@ fun onGoogleSignInClicked(
 
   scope.launch {
     try {
-      val activityContext = context as? Activity ?: context
+      val activityContext = context.findActivity() ?: context
       val result = credentialManager.getCredential(activityContext, request)
       val credential = result.credential
       if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
@@ -106,6 +118,19 @@ fun onGoogleSignInClicked(
     } catch (e: GetCredentialCancellationException) {
       Log.w(TAG, "Google Sign-In flow cancelled or dismissed: ${e.message}", e)
       onAuthCancelled()
+    } catch (e: NoCredentialException) {
+      Log.w(TAG, "No Google account available on device: ${e.message}", e)
+      onAuthError(
+        "No Google account ready on this device. Please add a Google account in Android Settings or try again."
+      )
+    } catch (e: GetCredentialProviderConfigurationException) {
+      Log.e(TAG, "Google Play Services / Credential Provider missing or outdated", e)
+      onAuthError(
+        "Google Play Services is unavailable or outdated on this emulator/device."
+      )
+    } catch (e: GetCredentialException) {
+      Log.e(TAG, "Google Credential Manager error: ${e.type} - ${e.message}", e)
+      onAuthError(e.errorMessage?.toString() ?: e.localizedMessage ?: "Google Sign-In failed.")
     } catch (e: Exception) {
       Log.e(TAG, "Google Sign-In failed", e)
       onAuthError(e.localizedMessage ?: "Sign in failed. Please try again.")

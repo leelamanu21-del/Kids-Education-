@@ -309,6 +309,15 @@ fun AuthScreen(
               modifier = Modifier.testTag("auth_error_text"),
             )
           }
+
+          Spacer(modifier = Modifier.height(12.dp))
+          Text(
+            text =
+              "Tip: Sign-in uses Android's Google account sheet. On an emulator, if 2-Step SMS/Gmail OTP doesn't arrive, choose Google Prompt / Authenticator or sign into Android Settings → Google first.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+          )
         }
       }
     }

@@ -93,9 +93,11 @@ class PhonicsProgressRepository(
   }
 
   suspend fun ensureProfileExists(defaultChildName: String): Result<LearnerProfile> {
-    val uid = requireUserId()
-    val docRef = db.collection("users").document(uid)
+    var docPath = "users/${auth.currentUser?.uid ?: "unauthenticated"}"
     return try {
+      val uid = requireUserId()
+      val docRef = db.collection("users").document(uid)
+      docPath = docRef.path
       val existingSnapshot = docRef.get().await()
       if (existingSnapshot.exists()) {
         val existing =
@@ -133,7 +135,7 @@ class PhonicsProgressRepository(
     } catch (e: CancellationException) {
       throw e
     } catch (e: Exception) {
-      handleFirestoreError(e, OperationType.CREATE, docRef.path)
+      handleFirestoreError(e, OperationType.CREATE, docPath)
       Result.failure(e)
     }
   }
@@ -143,23 +145,25 @@ class PhonicsProgressRepository(
     language: LanguageMode,
     childName: String? = null,
   ): Result<Unit> {
-    val uid = requireUserId()
-    val docRef = db.collection("users").document(uid)
-    val updates = buildMap<String, Any> {
-      put("preferredMode", mode.storageValue)
-      put("preferredLanguage", language.storageValue)
-      if (!childName.isNullOrBlank()) {
-        put("childName", childName.trim().take(40))
-      }
-      put("updatedAt", FieldValue.serverTimestamp())
-    }
+    var docPath = "users/${auth.currentUser?.uid ?: "unauthenticated"}"
     return try {
+      val uid = requireUserId()
+      val docRef = db.collection("users").document(uid)
+      docPath = docRef.path
+      val updates = buildMap<String, Any> {
+        put("preferredMode", mode.storageValue)
+        put("preferredLanguage", language.storageValue)
+        if (!childName.isNullOrBlank()) {
+          put("childName", childName.trim().take(40))
+        }
+        put("updatedAt", FieldValue.serverTimestamp())
+      }
       docRef.update(updates).await()
       Result.success(Unit)
     } catch (e: CancellationException) {
       throw e
     } catch (e: Exception) {
-      handleFirestoreError(e, OperationType.UPDATE, docRef.path)
+      handleFirestoreError(e, OperationType.UPDATE, docPath)
       Result.failure(e)
     }
   }
@@ -171,15 +175,17 @@ class PhonicsProgressRepository(
     quizScore: Int,
     mastered: Boolean,
   ): Result<Unit> {
-    val uid = requireUserId()
     val cleanLetter = letter.uppercase().take(1)
-    val safeStars = earnedStars.coerceIn(0, 3).toLong()
-    val safeScore = quizScore.coerceIn(0, 100).toLong()
-    val letterRef =
-      db.collection("users").document(uid).collection("letter_progress").document(cleanLetter)
-    val profileRef = db.collection("users").document(uid)
-
+    var letterPath = "users/${auth.currentUser?.uid ?: "unauthenticated"}/letter_progress/$cleanLetter"
     return try {
+      val uid = requireUserId()
+      val safeStars = earnedStars.coerceIn(0, 3).toLong()
+      val safeScore = quizScore.coerceIn(0, 100).toLong()
+      val letterRef =
+        db.collection("users").document(uid).collection("letter_progress").document(cleanLetter)
+      letterPath = letterRef.path
+      val profileRef = db.collection("users").document(uid)
+
       val existingSnap = letterRef.get().await()
       val previousStars = existingSnap.getLong("starsEarned") ?: 0L
       val previousPractice = existingSnap.getLong("practiceCount") ?: 0L
@@ -235,7 +241,7 @@ class PhonicsProgressRepository(
     } catch (e: CancellationException) {
       throw e
     } catch (e: Exception) {
-      handleFirestoreError(e, OperationType.WRITE, letterRef.path)
+      handleFirestoreError(e, OperationType.WRITE, letterPath)
       Result.failure(e)
     }
   }
