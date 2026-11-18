@@ -7,19 +7,24 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
 
+defaults:
+  run:
+    working-directory: .
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 21
-        uses: actions/setup-java@v5
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
-          java-version: '21'
+          distribution: 'zulu'
+          java-version: '17'
+          cache: 'gradle'
 
       - name: Set up Android SDK & Accept Licenses
         run: |
@@ -44,11 +49,6 @@ jobs:
           echo "Using sdkmanager: $SDKMANAGER"
           yes | "$SDKMANAGER" --licenses > /dev/null 2>&1 || true
           "$SDKMANAGER" "platforms;android-36.1" "build-tools;36.0.0" "platform-tools"
-
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v5
-        with:
-          gradle-version: '9.3.1'
 
       - name: Prepare keystore and .env
         run: |
@@ -75,22 +75,19 @@ jobs:
             fi
           fi
 
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
       - name: Build Debug APK
         run: |
           set -o pipefail
-          GRADLE_CMD="gradle"
-          if [ -f ./gradlew ]; then
-            chmod +x ./gradlew
-            GRADLE_CMD="./gradlew"
-          fi
-
-          if ! "$GRADLE_CMD" assembleDebug \
+          if ! ./gradlew assembleDebug \
             --no-daemon \
             --no-configuration-cache \
             --max-workers=2 \
             -Dorg.gradle.jvmargs="-Xmx2560m -XX:MaxMetaspaceSize=768m -Dfile.encoding=UTF-8" \
             2>&1 | tee gradle-build.log; then
-            echo "::error::Gradle assembleDebug failed. Check the Gradle Build Failure Log in Summary."
+            echo "::error::Gradle assembleDebug failed. Check the Gradle Errors box in Summary."
             {
               echo "### Gradle Errors"
               echo '```text'
@@ -108,5 +105,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PhonicsPath-debug-apk
-          path: app/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
