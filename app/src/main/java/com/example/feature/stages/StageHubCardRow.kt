@@ -42,6 +42,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.example.domain.model.CourseLevelId
 import com.example.domain.model.LanguageMode
+import com.example.domain.model.RewardStageIds
+import com.example.domain.model.StageProgress
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
 import com.example.ui.theme.MintGreen
@@ -53,6 +55,8 @@ import com.example.ui.theme.TangerineOrange
 @Composable
 fun CourseRoadmapSection(
   languageMode: LanguageMode,
+  masteredCount: Int = 0,
+  stageProgressById: Map<String, StageProgress> = emptyMap(),
   onOpenSightWords: () -> Unit,
   onOpenWordBlender: () -> Unit,
   onOpenUkgStage: () -> Unit,
@@ -99,58 +103,66 @@ fun CourseRoadmapSection(
           icon = Icons.Rounded.RecordVoiceOver,
           accentColor = CoralPrimary,
           badgeOverride =
-            if (languageMode == LanguageMode.HINGLISH) "Neeche Active ↓" else "Active Below ↓",
+            if (masteredCount > 0) "⭐ $masteredCount/26"
+            else if (languageMode == LanguageMode.HINGLISH) "Neeche Active ↓"
+            else "Active Below ↓",
           onClick = null,
           testTag = "course_card_level_1",
         )
       }
       item {
+        val l2Stars = stageProgressById[RewardStageIds.LEVEL_2_BLENDER]?.starsEarned ?: 0L
         StageModuleCard(
           level = CourseLevelId.LEVEL_2_BLENDING,
           languageMode = languageMode,
           icon = Icons.Rounded.Extension,
           accentColor = PlumPurple,
-          badgeOverride = null,
+          badgeOverride = if (l2Stars > 0L) "⭐ $l2Stars Stars" else null,
           onClick = onOpenWordBlender,
           testTag = "course_card_level_2",
         )
       }
       item {
+        val sightStars = stageProgressById[RewardStageIds.LEVEL_2_SIGHT_WORDS]?.starsEarned ?: 0L
         SightWordsQuickCard(
           languageMode = languageMode,
+          starsEarned = sightStars,
           onClick = onOpenSightWords,
         )
       }
       item {
+        val l3Stars = stageProgressById[RewardStageIds.LEVEL_3_UKG]?.starsEarned ?: 0L
         StageModuleCard(
           level = CourseLevelId.LEVEL_3_UKG,
           languageMode = languageMode,
           icon = Icons.Rounded.AutoStories,
           accentColor = SkyTeal,
-          badgeOverride = null,
+          badgeOverride = if (l3Stars > 0L) "⭐ $l3Stars Stars" else null,
           onClick = onOpenUkgStage,
           testTag = "course_card_level_3",
         )
       }
       item {
+        val l4Stars = stageProgressById[RewardStageIds.LEVEL_4_CLASS1]?.starsEarned ?: 0L
         StageModuleCard(
           level = CourseLevelId.LEVEL_4_CLASS1,
           languageMode = languageMode,
           icon = Icons.Rounded.MenuBook,
           accentColor = TangerineOrange,
-          badgeOverride = null,
+          badgeOverride = if (l4Stars > 0L) "⭐ $l4Stars Stars" else null,
           onClick = onOpenClass1Stage,
           testTag = "course_card_level_4",
         )
       }
       item {
+        val l5Stars = stageProgressById[RewardStageIds.LEVEL_5_CLASS2]?.starsEarned ?: 0L
         StageModuleCard(
           level = CourseLevelId.LEVEL_5_CLASS2,
           languageMode = languageMode,
           icon = Icons.Rounded.School,
           accentColor = MintGreen,
           darkContent = true,
-          badgeOverride = null,
+          badgeOverride = if (l5Stars > 0L) "⭐ $l5Stars Stars" else null,
           onClick = onOpenClass2Stage,
           testTag = "course_card_level_5",
         )
@@ -273,6 +285,7 @@ private fun StageModuleCard(
 @Composable
 private fun SightWordsQuickCard(
   languageMode: LanguageMode,
+  starsEarned: Long = 0L,
   onClick: () -> Unit,
 ) {
   Card(
@@ -323,7 +336,7 @@ private fun SightWordsQuickCard(
       )
 
       Text(
-        text = "the, is, he, she, to, you",
+        text = "3 Sets (24 Words): the, is, said, what, look...",
         style = MaterialTheme.typography.bodySmall,
         color = InkNavy.copy(alpha = 0.85f),
         maxLines = 2,
@@ -335,7 +348,7 @@ private fun SightWordsQuickCard(
         modifier = Modifier.fillMaxWidth(),
       ) {
         Text(
-          text = "Tap to Practice",
+          text = if (starsEarned > 0L) "⭐ $starsEarned Stars" else "Tap · 24 Words",
           style = MaterialTheme.typography.labelMedium,
           fontWeight = FontWeight.Bold,
           color = InkNavy,

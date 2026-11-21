@@ -6,8 +6,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -27,16 +25,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -46,6 +44,7 @@ import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -59,27 +58,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
-import com.example.domain.curriculum.EarlyCurriculumCatalog
+import com.example.domain.curriculum.UpperCurriculumCatalog
 import com.example.domain.model.GrammarCategory
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
 import com.example.ui.theme.MintGreen
 import com.example.ui.theme.PlumPurple
-import com.example.ui.theme.SkyTeal
-import com.example.ui.theme.SunshineAmber
 
 @Composable
 fun Class2GrammarStoryScreen(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit = {},
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   BackHandler(onBack = onBack)
 
   var selectedTab by remember { mutableIntStateOf(0) }
-  val tabs = listOf("Grammar", "Opposites & Rhymes", "Stories")
+  val tabs = listOf("Grammar (18)", "Opposites & Rhymes", "Stories (5)")
 
   Scaffold(
     modifier = modifier.fillMaxSize(),
@@ -144,9 +142,24 @@ fun Class2GrammarStoryScreen(
         }
 
         when (selectedTab) {
-          0 -> GrammarTab(languageMode = languageMode, audioPlayer = audioPlayer)
-          1 -> OppositesAndRhymesTab(languageMode = languageMode, audioPlayer = audioPlayer)
-          else -> PictureStoriesTab(languageMode = languageMode, audioPlayer = audioPlayer)
+          0 ->
+            GrammarTab(
+              languageMode = languageMode,
+              audioPlayer = audioPlayer,
+              onAwardStars = onAwardStars,
+            )
+          1 ->
+            OppositesAndRhymesTab(
+              languageMode = languageMode,
+              audioPlayer = audioPlayer,
+              onAwardStars = onAwardStars,
+            )
+          else ->
+            PictureStoriesTab(
+              languageMode = languageMode,
+              audioPlayer = audioPlayer,
+              onAwardStars = onAwardStars,
+            )
         }
       }
     }
@@ -157,14 +170,41 @@ fun Class2GrammarStoryScreen(
 private fun GrammarTab(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit,
 ) {
-  val items = EarlyCurriculumCatalog.grammarItems
+  val items = UpperCurriculumCatalog.grammarItems
   var questionIdx by remember { mutableIntStateOf(0) }
   val item = items[questionIdx]
   var selectedCategory by remember(questionIdx) { mutableStateOf<GrammarCategory?>(null) }
   var solved by remember(questionIdx) { mutableStateOf(false) }
+  val solvedIndices = remember { mutableStateListOf<Int>() }
 
   Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Surface(color = PlumPurple.copy(alpha = 0.14f), shape = RoundedCornerShape(50)) {
+        Text(
+          text = "Word ${questionIdx + 1} of ${items.size}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = PlumPurple,
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+      }
+      Surface(color = MintGreen.copy(alpha = 0.25f), shape = RoundedCornerShape(50)) {
+        Text(
+          text = "Score: ${solvedIndices.size} / ${items.size}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = InkNavy,
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+      }
+    }
+
     // Grammar Guide Cards
     GrammarCategory.entries.forEach { cat ->
       Surface(
@@ -257,6 +297,10 @@ private fun GrammarTab(
               selectedCategory = cat
               if (isCorrect) {
                 solved = true
+                if (questionIdx !in solvedIndices) {
+                  solvedIndices.add(questionIdx)
+                  onAwardStars(1)
+                }
                 audioPlayer.playCelebrationChime()
               } else {
                 audioPlayer.playGentleTryAgain()
@@ -294,253 +338,30 @@ private fun GrammarTab(
         modifier = Modifier.fillMaxWidth(),
       ) {
         Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          Text(item.hinglishTip, style = MaterialTheme.typography.bodyMedium, color = InkNavy)
-          Button(
-            onClick = { questionIdx = (questionIdx + 1) % items.size },
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth().height(48.dp),
-          ) {
-            Text("Next Word →", fontWeight = FontWeight.Bold)
-          }
+          Text("${item.hinglishTip} (+1 ⭐)", style = MaterialTheme.typography.bodyMedium, color = InkNavy)
         }
       }
     }
-  }
-}
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun OppositesAndRhymesTab(
-  languageMode: LanguageMode,
-  audioPlayer: PhonicsAudioPlayer,
-) {
-  Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    Text("Opposites (Vilom Shabd) · Tap to Hear", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-    EarlyCurriculumCatalog.opposites.forEach { pair ->
-      Card(
-        onClick = { audioPlayer.speakText("${pair.wordA}. Opposite is ${pair.wordB}.") },
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize(),
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      OutlinedButton(
+        onClick = { questionIdx = (questionIdx - 1 + items.size) % items.size },
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
       ) {
-        Row(
-          modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 14.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.SpaceBetween,
-        ) {
-          Text("${pair.emojiA} ${pair.wordA}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = CoralPrimary)
-          Text(pair.hinglishPair, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-          Text("${pair.wordB} ${pair.emojiB}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold, color = SkyTeal)
-        }
+        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Prev Word", fontWeight = FontWeight.Bold)
       }
-    }
-
-    Spacer(modifier = Modifier.height(6.dp))
-    Text("Rhyming Words (Ek Jaisi Aawaz)", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-    EarlyCurriculumCatalog.rhymeFamilies.forEach { rhyme ->
-      Card(
-        shape = RoundedCornerShape(18.dp),
-        colors = CardDefaults.cardColors(containerColor = SunshineAmber.copy(alpha = 0.2f)),
-        modifier = Modifier.fillMaxWidth(),
+      Button(
+        onClick = { questionIdx = (questionIdx + 1) % items.size },
+        colors = ButtonDefaults.buttonColors(containerColor = PlumPurple),
+        shape = RoundedCornerShape(14.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
       ) {
-        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-          Text(
-            text = "${rhyme.emoji} Rhymes with ${rhyme.anchorWord}:",
-            style = MaterialTheme.typography.titleSmall,
-            fontWeight = FontWeight.Bold,
-            color = InkNavy,
-          )
-          FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            rhyme.rhymingWords.forEach { word ->
-              Surface(
-                onClick = { audioPlayer.speakWord(word, languageMode) },
-                color = Color.White,
-                shape = RoundedCornerShape(12.dp),
-                modifier = Modifier.minimumInteractiveComponentSize(),
-              ) {
-                Text(
-                  text = word,
-                  style = MaterialTheme.typography.labelLarge,
-                  fontWeight = FontWeight.Bold,
-                  color = InkNavy,
-                  modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                )
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun PictureStoriesTab(
-  languageMode: LanguageMode,
-  audioPlayer: PhonicsAudioPlayer,
-) {
-  val stories = EarlyCurriculumCatalog.pictureStories
-  var storyIdx by remember { mutableIntStateOf(0) }
-  val story = stories[storyIdx]
-
-  var blankChoice by remember(storyIdx) { mutableStateOf<Int?>(null) }
-  var blankSolved by remember(storyIdx) { mutableStateOf(false) }
-  var quizChoice by remember(storyIdx) { mutableStateOf<Int?>(null) }
-  var quizSolved by remember(storyIdx) { mutableStateOf(false) }
-
-  Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      stories.forEachIndexed { idx, s ->
-        FilterChip(
-          selected = storyIdx == idx,
-          onClick = { storyIdx = idx },
-          label = { Text(s.title, fontWeight = FontWeight.Bold) },
-          modifier = Modifier.minimumInteractiveComponentSize(),
-        )
-      }
-    }
-
-    Card(
-      shape = RoundedCornerShape(24.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-      modifier = Modifier.fillMaxWidth(),
-    ) {
-      Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text(
-          text = story.emojiBanner,
-          fontSize = 44.sp,
-          modifier = Modifier.align(Alignment.CenterHorizontally),
-        )
-        Text(
-          text = story.title,
-          style = MaterialTheme.typography.headlineSmall,
-          fontWeight = FontWeight.ExtraBold,
-          color = CoralPrimary,
-        )
-        story.lines.forEach { line ->
-          Text(text = line, style = MaterialTheme.typography.bodyLarge, color = MaterialTheme.colorScheme.onSurface)
-        }
-        Surface(
-          color = SkyTeal.copy(alpha = 0.12f),
-          shape = RoundedCornerShape(14.dp),
-          modifier = Modifier.fillMaxWidth(),
-        ) {
-          Text(
-            text = "Kahani: ${story.hinglishSummary}",
-            style = MaterialTheme.typography.bodySmall,
-            color = InkNavy,
-            modifier = Modifier.padding(10.dp),
-          )
-        }
-        Button(
-          onClick = { audioPlayer.speakText(story.lines.joinToString(" ")) },
-          colors = ButtonDefaults.buttonColors(containerColor = SkyTeal, contentColor = Color.White),
-          shape = RoundedCornerShape(16.dp),
-          modifier = Modifier.fillMaxWidth().height(48.dp),
-        ) {
-          Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(modifier = Modifier.width(6.dp))
-          Text("Listen Story", fontWeight = FontWeight.Bold)
-        }
-      }
-    }
-
-    // Spelling Fill in the blank
-    Card(
-      shape = RoundedCornerShape(22.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      modifier = Modifier.fillMaxWidth(),
-    ) {
-      Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Fill in the Blank:", style = MaterialTheme.typography.labelLarge, color = PlumPurple)
-        Text(story.blankPrompt, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-          story.blankOptions.forEachIndexed { idx, opt ->
-            val picked = blankChoice == idx
-            val correct = idx == story.blankCorrectIndex
-            val bg =
-              when {
-                picked && correct -> MintGreen
-                picked && !correct -> CoralPrimary
-                else -> MaterialTheme.colorScheme.surfaceVariant
-              }
-            Surface(
-              onClick = {
-                if (!blankSolved) {
-                  blankChoice = idx
-                  if (correct) {
-                    blankSolved = true
-                    audioPlayer.playCelebrationChime()
-                    audioPlayer.speakWord(opt, languageMode)
-                  } else {
-                    audioPlayer.playGentleTryAgain()
-                  }
-                }
-              },
-              color = bg,
-              shape = RoundedCornerShape(14.dp),
-              modifier = Modifier.weight(1f).minimumInteractiveComponentSize(),
-            ) {
-              Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(vertical = 12.dp)) {
-                Text(opt, fontWeight = FontWeight.Bold, color = if (picked && !correct) Color.White else InkNavy)
-              }
-            }
-          }
-        }
-        if (blankSolved) {
-          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MintGreen)
-            Text("Correct spelling!", style = MaterialTheme.typography.labelLarge, color = InkNavy)
-          }
-        }
-      }
-    }
-
-    // Comprehension Quiz
-    Card(
-      shape = RoundedCornerShape(22.dp),
-      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-      modifier = Modifier.fillMaxWidth(),
-    ) {
-      Column(modifier = Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Story Question:", style = MaterialTheme.typography.labelLarge, color = CoralPrimary)
-        Text(story.comprehensionQuestion, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-        story.comprehensionOptions.forEachIndexed { idx, opt ->
-          val picked = quizChoice == idx
-          val correct = idx == story.comprehensionCorrectIndex
-          val bg =
-            when {
-              picked && correct -> MintGreen
-              picked && !correct -> CoralPrimary
-              else -> MaterialTheme.colorScheme.surfaceVariant
-            }
-          Surface(
-            onClick = {
-              if (!quizSolved) {
-                quizChoice = idx
-                if (correct) {
-                  quizSolved = true
-                  audioPlayer.playCelebrationChime()
-                } else {
-                  audioPlayer.playGentleTryAgain()
-                }
-              }
-            },
-            color = bg,
-            shape = RoundedCornerShape(14.dp),
-            modifier = Modifier.fillMaxWidth().minimumInteractiveComponentSize(),
-          ) {
-            Text(
-              text = opt,
-              style = MaterialTheme.typography.titleSmall,
-              fontWeight = FontWeight.Bold,
-              color = if (picked && !correct) Color.White else InkNavy,
-              modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp),
-            )
-          }
-        }
+        Text("Next Word", fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.width(6.dp))
+        Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
       }
     }
   }

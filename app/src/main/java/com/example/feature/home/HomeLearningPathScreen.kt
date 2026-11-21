@@ -41,12 +41,15 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.Logout
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.AdminPanelSettings
 import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Edit
+import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Explore
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.PlayArrow
@@ -93,7 +96,9 @@ import androidx.compose.ui.unit.sp
 import com.example.R
 import com.example.core.timer.SessionTimerUiState
 import com.example.core.ui.LanguageScriptBadge
+import com.example.domain.model.BadgeProgress
 import com.example.domain.model.LanguageMode
+import com.example.domain.model.LearnerRank
 import com.example.domain.model.LearningMode
 import com.example.domain.model.LetterProgress
 import com.example.domain.model.PhonicsLetter
@@ -126,6 +131,7 @@ fun HomeLearningPathScreen(
   onOpenUkgStage: () -> Unit,
   onOpenClass1Stage: () -> Unit,
   onOpenClass2Stage: () -> Unit,
+  onOpenRewards: () -> Unit = {},
   onOpenParentZone: () -> Unit,
   onSignOut: () -> Unit,
   modifier: Modifier = Modifier,
@@ -205,9 +211,12 @@ fun HomeLearningPathScreen(
                 TopLearnerHeader(
                   childName = uiState.profile.childName,
                   totalStars = uiState.profile.totalStars,
+                  unlockedBadgeCount = uiState.unlockedBadgeCount,
+                  totalBadgeCount = uiState.badgeProgress.size,
                   languageMode = uiState.languageMode,
                   onEditNameClick = { showEditNameDialog = true },
                   onToggleLanguage = onToggleLanguage,
+                  onOpenRewards = onOpenRewards,
                   onOpenParentZone = onOpenParentZone,
                   onSignOut = onSignOut,
                 )
@@ -259,11 +268,24 @@ fun HomeLearningPathScreen(
               item(span = { GridItemSpan(maxLineSpan) }) {
                 CourseRoadmapSection(
                   languageMode = uiState.languageMode,
+                  masteredCount = uiState.masteredCount,
+                  stageProgressById = uiState.stageProgressById,
                   onOpenSightWords = onOpenSightWords,
                   onOpenWordBlender = onOpenWordBlender,
                   onOpenUkgStage = onOpenUkgStage,
                   onOpenClass1Stage = onOpenClass1Stage,
                   onOpenClass2Stage = onOpenClass2Stage,
+                )
+              }
+
+              // 2c. Digital Badges & Next Reward Strip
+              item(span = { GridItemSpan(maxLineSpan) }) {
+                NextBadgeGoalStrip(
+                  learnerRank = uiState.learnerRank,
+                  badgeProgress = uiState.badgeProgress,
+                  unlockedCount = uiState.unlockedBadgeCount,
+                  languageMode = uiState.languageMode,
+                  onOpenRewards = onOpenRewards,
                 )
               }
 
@@ -366,13 +388,17 @@ fun HomeLearningPathScreen(
   }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun TopLearnerHeader(
   childName: String,
   totalStars: Long,
+  unlockedBadgeCount: Int,
+  totalBadgeCount: Int,
   languageMode: LanguageMode,
   onEditNameClick: () -> Unit,
   onToggleLanguage: () -> Unit,
+  onOpenRewards: () -> Unit,
   onOpenParentZone: () -> Unit,
   onSignOut: () -> Unit,
 ) {
@@ -472,19 +498,24 @@ private fun TopLearnerHeader(
       }
     }
 
-    Row(
+    FlowRow(
       modifier = Modifier.fillMaxWidth(),
-      verticalAlignment = Alignment.CenterVertically,
-      horizontalArrangement = Arrangement.spacedBy(10.dp),
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-      // Total Stars Badge
+      // Total Stars Badge (tap to view Rewards & Badges)
       Surface(
+        onClick = onOpenRewards,
         color = SunshineAmber.copy(alpha = 0.24f),
         shape = RoundedCornerShape(50),
-        modifier = Modifier.border(1.5.dp, SunshineAmber, RoundedCornerShape(50)),
+        modifier =
+          Modifier
+            .minimumInteractiveComponentSize()
+            .border(1.5.dp, SunshineAmber, RoundedCornerShape(50))
+            .testTag("stars_rewards_pill"),
       ) {
         Row(
-          modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+          modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           Icon(
@@ -505,6 +536,39 @@ private fun TopLearnerHeader(
         }
       }
 
+      // Digital Badges Pill
+      Surface(
+        onClick = onOpenRewards,
+        color = PlumPurple.copy(alpha = 0.14f),
+        shape = RoundedCornerShape(50),
+        modifier =
+          Modifier
+            .minimumInteractiveComponentSize()
+            .border(1.5.dp, PlumPurple.copy(alpha = 0.6f), RoundedCornerShape(50))
+            .testTag("open_badges_pill"),
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Icon(
+            imageVector = Icons.Rounded.EmojiEvents,
+            contentDescription = "Open Badges and Rewards",
+            tint = PlumPurple,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(5.dp))
+          Text(
+            text = "$unlockedBadgeCount/$totalBadgeCount Badges",
+            style = MaterialTheme.typography.labelLarge,
+            color = PlumPurple,
+            fontWeight = FontWeight.Bold,
+            maxLines = 1,
+            softWrap = false,
+          )
+        }
+      }
+
       // Hinglish / English Toggle Pill with English 'A' and Hindi 'अ'
       Surface(
         onClick = onToggleLanguage,
@@ -517,7 +581,7 @@ private fun TopLearnerHeader(
             .testTag("language_toggle_button"),
       ) {
         Row(
-          modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+          modifier = Modifier.padding(horizontal = 13.dp, vertical = 10.dp),
           verticalAlignment = Alignment.CenterVertically,
         ) {
           LanguageScriptBadge(
@@ -525,7 +589,7 @@ private fun TopLearnerHeader(
             fontSize = 14.sp,
             description = "Toggle Hinglish or English",
           )
-          Spacer(modifier = Modifier.width(8.dp))
+          Spacer(modifier = Modifier.width(7.dp))
           Text(
             text = languageMode.label,
             style = MaterialTheme.typography.labelLarge,
@@ -534,6 +598,99 @@ private fun TopLearnerHeader(
             softWrap = false,
           )
         }
+      }
+    }
+  }
+}
+
+@Composable
+private fun NextBadgeGoalStrip(
+  learnerRank: LearnerRank,
+  badgeProgress: List<BadgeProgress>,
+  unlockedCount: Int,
+  languageMode: LanguageMode,
+  onOpenRewards: () -> Unit,
+) {
+  val nextGoal = badgeProgress.filter { !it.unlocked }.maxByOrNull { it.fraction }
+
+  Card(
+    onClick = onOpenRewards,
+    shape = RoundedCornerShape(22.dp),
+    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+    modifier =
+      Modifier
+        .fillMaxWidth()
+        .border(1.5.dp, PlumPurple.copy(alpha = 0.25f), RoundedCornerShape(22.dp))
+        .testTag("next_badge_goal_card"),
+  ) {
+    Row(
+      modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+      Surface(
+        color = SunshineAmber.copy(alpha = 0.26f),
+        shape = CircleShape,
+        modifier = Modifier.size(46.dp),
+      ) {
+        Box(contentAlignment = Alignment.Center) {
+          Text(
+            text = nextGoal?.badge?.emoji ?: learnerRank.emoji,
+            fontSize = 24.sp,
+          )
+        }
+      }
+      Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        val headline =
+          if (nextGoal != null) {
+            val title =
+              if (languageMode == LanguageMode.HINGLISH) nextGoal.badge.titleHinglish
+              else nextGoal.badge.titleEn
+            if (languageMode == LanguageMode.HINGLISH) "Agla Badge: $title"
+            else "Next Badge: $title"
+          } else {
+            if (languageMode == LanguageMode.HINGLISH) "Sabhi Badges Jeet Liye! ${learnerRank.titleHinglish}"
+            else "All Badges Unlocked! ${learnerRank.titleEn}"
+          }
+        Text(
+          text = headline,
+          style = MaterialTheme.typography.titleSmall,
+          fontWeight = FontWeight.Bold,
+          color = InkNavy,
+          maxLines = 1,
+          overflow = TextOverflow.Ellipsis,
+        )
+        if (nextGoal != null) {
+          LinearProgressIndicator(
+            progress = { nextGoal.fraction.coerceAtLeast(0.05f) },
+            color = PlumPurple,
+            trackColor = PlumPurple.copy(alpha = 0.14f),
+            modifier = Modifier.fillMaxWidth().height(7.dp).clip(RoundedCornerShape(50)),
+          )
+          Text(
+            text =
+              "${nextGoal.currentProgress}/${nextGoal.badge.targetProgress} · " +
+                if (languageMode == LanguageMode.HINGLISH) nextGoal.badge.descriptionHinglish
+                else nextGoal.badge.descriptionEn,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+          )
+        }
+      }
+      Surface(
+        color = PlumPurple.copy(alpha = 0.12f),
+        shape = RoundedCornerShape(12.dp),
+      ) {
+        Text(
+          text = "$unlockedCount/${badgeProgress.size}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = PlumPurple,
+          modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp),
+        )
       }
     }
   }

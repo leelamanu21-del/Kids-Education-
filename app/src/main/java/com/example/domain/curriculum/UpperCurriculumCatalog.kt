@@ -1,0 +1,402 @@
+package com.example.domain.curriculum
+
+import com.example.domain.model.BlendClusterItem
+import com.example.domain.model.FluencySentenceItem
+import com.example.domain.model.GrammarCategory
+import com.example.domain.model.GrammarQuizItem
+import com.example.domain.model.OppositePairItem
+import com.example.domain.model.PictureStoryItem
+import com.example.domain.model.RhymeFamilyItem
+
+object UpperCurriculumCatalog {
+
+  // Level 4: 12 Consonant Blends & Clusters (Class 1)
+  val blends: List<BlendClusterItem> =
+    listOf(
+      BlendClusterItem(
+        blend = "bl",
+        spokenBlend = "bluh",
+        exampleWord = "blue",
+        remainingPart = "ue",
+        emoji = "💙",
+        hinglishTip = "B aur L ko jaldi saath bolo 'ब्ल': bl + ue = blue!",
+        hindiVoiceScript = "b और l को साथ बोलो ब्ल, जैसे blue और black.",
+        sampleWords = listOf("blue", "black", "block", "blow", "bloom"),
+      ),
+      BlendClusterItem(
+        blend = "gr",
+        spokenBlend = "gruh",
+        exampleWord = "green",
+        remainingPart = "een",
+        emoji = "💚",
+        hinglishTip = "G aur R milkar bole 'ग्र': gr + een = green!",
+        hindiVoiceScript = "g और r मिलकर बोले ग्र, जैसे green और grapes.",
+        sampleWords = listOf("green", "grapes", "grass", "grin", "great"),
+      ),
+      BlendClusterItem(
+        blend = "st",
+        spokenBlend = "stuh",
+        exampleWord = "star",
+        remainingPart = "ar",
+        emoji = "⭐",
+        hinglishTip = "S aur T saath mein bole 'स्ट': st + ar = star!",
+        hindiVoiceScript = "s और t साथ में बोले स्ट, जैसे star और stop.",
+        sampleWords = listOf("star", "stop", "step", "stick", "stone"),
+      ),
+      BlendClusterItem(
+        blend = "fr",
+        spokenBlend = "fruh",
+        exampleWord = "frog",
+        remainingPart = "og",
+        emoji = "🐸",
+        hinglishTip = "F aur R milkar bole 'फ्र': fr + og = frog!",
+        hindiVoiceScript = "f और r मिलकर बोले फ्र, जैसे frog और fruit.",
+        sampleWords = listOf("frog", "fruit", "friend", "frame", "fresh"),
+      ),
+      BlendClusterItem(
+        blend = "cl",
+        spokenBlend = "kluh",
+        exampleWord = "clap",
+        remainingPart = "ap",
+        emoji = "👏",
+        hinglishTip = "C aur L saath mein bole 'क्ल': cl + ap = clap!",
+        hindiVoiceScript = "c और l साथ में बोले क्ल, जैसे clap और cloud.",
+        sampleWords = listOf("clap", "cloud", "clock", "clean", "class"),
+      ),
+      BlendClusterItem(
+        blend = "tr",
+        spokenBlend = "truh",
+        exampleWord = "train",
+        remainingPart = "ain",
+        emoji = "🚂",
+        hinglishTip = "T aur R milkar bole 'ट्र': tr + ain = train!",
+        hindiVoiceScript = "t और r मिलकर बोले ट्र, जैसे train और tree.",
+        sampleWords = listOf("train", "tree", "truck", "trip", "mango tree"),
+      ),
+      BlendClusterItem(
+        blend = "br",
+        spokenBlend = "bruh",
+        exampleWord = "bread",
+        remainingPart = "ead",
+        emoji = "🍞",
+        hinglishTip = "B aur R saath mein bole 'ब्र': br + ead = bread!",
+        hindiVoiceScript = "b और r साथ में बोले ब्र, जैसे bread और bright.",
+        sampleWords = listOf("bread", "bright", "brush", "brown", "brother"),
+      ),
+      BlendClusterItem(
+        blend = "cr",
+        spokenBlend = "kruh",
+        exampleWord = "crab",
+        remainingPart = "ab",
+        emoji = "🦀",
+        hinglishTip = "C aur R milkar bole 'क्र': cr + ab = crab!",
+        hindiVoiceScript = "c और r मिलकर बोले क्र, जैसे crab और crown.",
+        sampleWords = listOf("crab", "crown", "cry", "cream", "crayon"),
+      ),
+      BlendClusterItem(
+        blend = "dr",
+        spokenBlend = "druh",
+        exampleWord = "drum",
+        remainingPart = "um",
+        emoji = "🥁",
+        hinglishTip = "D aur R saath mein bole 'ड्र': dr + um = drum!",
+        hindiVoiceScript = "d और r साथ में बोले ड्र, जैसे drum और draw.",
+        sampleWords = listOf("drum", "draw", "dress", "drink", "drop"),
+      ),
+      BlendClusterItem(
+        blend = "fl",
+        spokenBlend = "fluh",
+        exampleWord = "flower",
+        remainingPart = "ower",
+        emoji = "🌸",
+        hinglishTip = "F aur L saath mein bole 'फ़्ल': fl + ower = flower!",
+        hindiVoiceScript = "f और l साथ में बोले फ़्ल, जैसे flower और flag.",
+        sampleWords = listOf("flower", "flag", "fly", "float", "flame"),
+      ),
+      BlendClusterItem(
+        blend = "pl",
+        spokenBlend = "pluh",
+        exampleWord = "plane",
+        remainingPart = "ane",
+        emoji = "✈️",
+        hinglishTip = "P aur L saath mein bole 'प्ल': pl + ane = plane!",
+        hindiVoiceScript = "p और l साथ में बोले प्ल, जैसे plane और play.",
+        sampleWords = listOf("plane", "play", "plant", "plate", "plum"),
+      ),
+      BlendClusterItem(
+        blend = "sp",
+        spokenBlend = "spuh",
+        exampleWord = "spoon",
+        remainingPart = "oon",
+        emoji = "🥄",
+        hinglishTip = "S aur P saath mein bole 'स्प': sp + oon = spoon!",
+        hindiVoiceScript = "s और p साथ में बोले स्प, जैसे spoon और sport.",
+        sampleWords = listOf("spoon", "spot", "spin", "space", "sport"),
+      ),
+    )
+
+  // Level 4: 10 Progressive Fluency Sentences (Class 1)
+  val fluencySentences: List<FluencySentenceItem> =
+    listOf(
+      FluencySentenceItem(
+        id = 1,
+        sentence = "The cat sat on the mat.",
+        emoji = "🐱",
+        hinglishMeaning = "Billi chatai par baithi hai.",
+        hinglishTip = "Har word par tap karke suno, phir poora vaakya ek saath padho!",
+        hindiVoiceExplain = "इसका मतलब है बिल्ली चटाई पर बैठी है।",
+        quizQuestion = "Where did the cat sit?",
+        quizOptions = listOf("On the mat", "In a ship", "On a star"),
+        correctOptionIndex = 0,
+      ),
+      FluencySentenceItem(
+        id = 2,
+        sentence = "A green frog can hop fast.",
+        emoji = "🐸",
+        hinglishMeaning = "Ek hara mendhak tez kood sakta hai.",
+        hinglishTip = "'gr' (green) aur 'fr' (frog) blend dhyan se padho!",
+        hindiVoiceExplain = "इसका मतलब है एक हरा मेंढक तेज़ कूद सकता है।",
+        quizQuestion = "What color is the frog?",
+        quizOptions = listOf("Blue", "Green", "Yellow"),
+        correctOptionIndex = 1,
+      ),
+      FluencySentenceItem(
+        id = 3,
+        sentence = "She has a big blue ship.",
+        emoji = "🚢",
+        hinglishMeaning = "Uske paas ek bada neela jahaaz hai.",
+        hinglishTip = "'She' sight word hai aur 'sh' se 'ship' banta hai!",
+        hindiVoiceExplain = "इसका मतलब है उसके पास एक बड़ा नीला जहाज़ है।",
+        quizQuestion = "What does she have?",
+        quizOptions = listOf("A blue ship", "A red hat", "A tiny dog"),
+        correctOptionIndex = 0,
+      ),
+      FluencySentenceItem(
+        id = 4,
+        sentence = "Look at the bright star in the sky.",
+        emoji = "🌟",
+        hinglishMeaning = "Aasman mein chamakdar taare ko dekho.",
+        hinglishTip = "'st' blend se 'star' aur 'br' se 'bright' banta hai!",
+        hindiVoiceExplain = "इसका मतलब है आसमान में चमकदार तारे को देखो।",
+        quizQuestion = "Where is the bright star?",
+        quizOptions = listOf("In a box", "In the sky", "Under a bed"),
+        correctOptionIndex = 1,
+      ),
+      FluencySentenceItem(
+        id = 5,
+        sentence = "My sweet dad made a warm cake.",
+        emoji = "🎂",
+        hinglishMeaning = "Mere pyaare papa ne ek garam cake banaya.",
+        hinglishTip = "'made' aur 'cake' dono mein Magic 'e' rule laga hai!",
+        hindiVoiceExplain = "इसका मतलब है मेरे प्यारे पापा ने एक गरम केक बनाया।",
+        quizQuestion = "Who made the cake?",
+        quizOptions = listOf("Dad", "A frog", "A duck"),
+        correctOptionIndex = 0,
+      ),
+      FluencySentenceItem(
+        id = 6,
+        sentence = "Three little chicks sit on a chair.",
+        emoji = "🐥",
+        hinglishMeaning = "Teen chhote chooze kursi par baithe hain.",
+        hinglishTip = "Ismein 'th' (Three) aur 'ch' (chicks, chair) digraphs hain!",
+        hindiVoiceExplain = "इसका मतलब है तीन छोटे चूज़े कुर्सी पर बैठे हैं।",
+        quizQuestion = "How many chicks are on the chair?",
+        quizOptions = listOf("Two", "Three", "Five"),
+        correctOptionIndex = 1,
+      ),
+      FluencySentenceItem(
+        id = 7,
+        sentence = "A brown train goes past the green tree.",
+        emoji = "🚂",
+        hinglishMeaning = "Ek bhoori railgaadi hare ped ke paas se guzarti hai.",
+        hinglishTip = "'tr' (train, tree) aur 'br' (brown) blends ko mila kar padho!",
+        hindiVoiceExplain = "इसका मतलब है एक भूरी रेलगाड़ी हरे पेड़ के पास से गुज़रती है।",
+        quizQuestion = "What goes past the tree?",
+        quizOptions = listOf("A ship", "A brown train", "A red kite"),
+        correctOptionIndex = 1,
+      ),
+      FluencySentenceItem(
+        id = 8,
+        sentence = "We clap and sing when the rain stops.",
+        emoji = "☔",
+        hinglishMeaning = "Jab baarish rukti hai to hum taali bajate aur gaate hain.",
+        hinglishTip = "'cl' (clap), 'ng' (sing) aur 'st' (stops) dhyan se suno!",
+        hindiVoiceExplain = "इसका मतलब है जब बारिश रुकती है तो हम ताली बजाते और गाते हैं।",
+        quizQuestion = "When do we clap and sing?",
+        quizOptions = listOf("When rain stops", "At midnight", "Inside a cave"),
+        correctOptionIndex = 0,
+      ),
+      FluencySentenceItem(
+        id = 9,
+        sentence = "The white whale swims in the cool sea.",
+        emoji = "🐳",
+        hinglishMeaning = "Safed whale thande samundar mein tairti hai.",
+        hinglishTip = "'wh' (white, whale) aur 'oo' (cool) sounds note karo!",
+        hindiVoiceExplain = "इसका मतलब है सफ़ेद व्हेल ठंडे समुद्र में तैरती है।",
+        quizQuestion = "Where does the whale swim?",
+        quizOptions = listOf("In a mug", "In the cool sea", "On a tree"),
+        correctOptionIndex = 1,
+      ),
+      FluencySentenceItem(
+        id = 10,
+        sentence = "I eat fresh fruit with a clean spoon.",
+        emoji = "🍓",
+        hinglishMeaning = "Main saaf chammach se taaza phal khaata hoon.",
+        hinglishTip = "'fr' (fresh, fruit), 'cl' (clean) aur 'sp' (spoon) ek saath!",
+        hindiVoiceExplain = "इसका मतलब है मैं साफ़ चम्मच से ताज़ा फल खाता हूँ।",
+        quizQuestion = "What do I eat with a spoon?",
+        quizOptions = listOf("Fresh fruit", "Paper kites", "Small rocks"),
+        correctOptionIndex = 0,
+      ),
+    )
+
+  // Level 5: 18 Grammar Challenge Items (Class 2 · 6 Nouns, 6 Verbs, 6 Adjectives)
+  val grammarItems: List<GrammarQuizItem> =
+    listOf(
+      GrammarQuizItem("Mango", "🥭", "I eat a sweet Mango.", GrammarCategory.NOUN, "'Mango' ek phal ka naam hai — isliye yeh Noun hai!"),
+      GrammarQuizItem("Jump", "🦘", "The rabbits jump high.", GrammarCategory.VERB, "'Jump' matlab koodna (action) — isliye yeh Verb hai!"),
+      GrammarQuizItem("Blue", "💙", "Look at the blue sky.", GrammarCategory.ADJECTIVE, "'Blue' aasman ka rang batata hai — isliye yeh Adjective hai!"),
+      GrammarQuizItem("School", "🏫", "We go to school daily.", GrammarCategory.NOUN, "'School' ek jagah ka naam hai — isliye yeh Noun hai!"),
+      GrammarQuizItem("Run", "🏃", "Kids run in the park.", GrammarCategory.VERB, "'Run' matlab daudna (action) — isliye yeh Verb hai!"),
+      GrammarQuizItem("Happy", "😊", "Riya is a happy girl.", GrammarCategory.ADJECTIVE, "'Happy' batata hai ki ladki kaisi hai — Adjective!"),
+      GrammarQuizItem("Elephant", "🐘", "The elephant has a long trunk.", GrammarCategory.NOUN, "'Elephant' ek jaanwar ka naam hai — Noun!"),
+      GrammarQuizItem("Write", "✍️", "I write neatly in my book.", GrammarCategory.VERB, "'Write' matlab likhna (kaam) — Verb!"),
+      GrammarQuizItem("Tall", "🦒", "A giraffe is very tall.", GrammarCategory.ADJECTIVE, "'Tall' unchai (gun) batata hai — Adjective!"),
+      GrammarQuizItem("Pencil", "✏️", "This yellow pencil is sharp.", GrammarCategory.NOUN, "'Pencil' ek cheez ka naam hai — Noun!"),
+      GrammarQuizItem("Sing", "🎤", "Birds sing in the morning.", GrammarCategory.VERB, "'Sing' matlab gaana gaana (action) — Verb!"),
+      GrammarQuizItem("Sweet", "🍯", "Honey tastes very sweet.", GrammarCategory.ADJECTIVE, "'Sweet' swaad (gun) batata hai — Adjective!"),
+      GrammarQuizItem("Garden", "🌻", "Butterflies fly in the garden.", GrammarCategory.NOUN, "'Garden' ek jagah ka naam hai — Noun!"),
+      GrammarQuizItem("Swim", "🏊", "Ducks swim across the pond.", GrammarCategory.VERB, "'Swim' matlab tairna (action) — Verb!"),
+      GrammarQuizItem("Warm", "☀️", "We drink warm milk at night.", GrammarCategory.ADJECTIVE, "'Warm' doodh kaisa hai batata hai — Adjective!"),
+      GrammarQuizItem("Teacher", "👩‍🏫", "Our teacher tells fun stories.", GrammarCategory.NOUN, "'Teacher' ek vyakti ka naam hai — Noun!"),
+      GrammarQuizItem("Read", "📖", "Let us read a story together.", GrammarCategory.VERB, "'Read' matlab padhna (kaam) — Verb!"),
+      GrammarQuizItem("Shiny", "✨", "I found a shiny coin.", GrammarCategory.ADJECTIVE, "'Shiny' chamakdar gun batata hai — Adjective!"),
+    )
+
+  // Level 5: 14 Opposite Pairs (Class 2)
+  val opposites: List<OppositePairItem> =
+    listOf(
+      OppositePairItem("Big", "🐘", "Small", "🐭", "Bada ↔ Chhota"),
+      OppositePairItem("Hot", "☀️", "Cold", "🧊", "Garam ↔ Thanda"),
+      OppositePairItem("Day", "🌤️", "Night", "🌙", "Din ↔ Raat"),
+      OppositePairItem("Happy", "😊", "Sad", "😢", "Khush ↔ Udaas"),
+      OppositePairItem("Fast", "🐆", "Slow", "🐢", "Tez ↔ Dheema"),
+      OppositePairItem("Up", "⬆️", "Down", "⬇️", "Upar ↔ Neeche"),
+      OppositePairItem("Tall", "🦒", "Short", "🐇", "Lamba ↔ Chhota"),
+      OppositePairItem("Full", "🥛", "Empty", "🫙", "Bhara ↔ Khaali"),
+      OppositePairItem("Open", "📖", "Close", "📕", "Khula ↔ Band"),
+      OppositePairItem("Soft", "🧸", "Hard", "🪨", "Mulayam ↔ Sakht"),
+      OppositePairItem("Clean", "✨", "Dirty", "🥾", "Saaf ↔ Ganda"),
+      OppositePairItem("Light", "🪶", "Heavy", "🪨", "Halka ↔ Bhaari"),
+      OppositePairItem("Near", "🏠", "Far", "🏔️", "Paas ↔ Door"),
+      OppositePairItem("Young", "🐣", "Old", "🐢", "Jawaan ↔ Boodha"),
+    )
+
+  // Level 5: 8 Rhyming Word Families (Class 2 · with Odd-One-Out mini check)
+  val rhymeFamilies: List<RhymeFamilyItem> =
+    listOf(
+      RhymeFamilyItem("Star", "⭐", listOf("Car", "Jar", "Far"), "Dog"),
+      RhymeFamilyItem("Cake", "🎂", listOf("Bake", "Lake", "Make"), "Sun"),
+      RhymeFamilyItem("Ball", "⚽", listOf("Tall", "Wall", "Call"), "Pen"),
+      RhymeFamilyItem("Tree", "🌳", listOf("Bee", "Free", "Three"), "Hat"),
+      RhymeFamilyItem("Rain", "🌧️", listOf("Train", "Brain", "Chain"), "Cup"),
+      RhymeFamilyItem("Boat", "⛵", listOf("Coat", "Goat", "Float"), "Milk"),
+      RhymeFamilyItem("Ring", "💍", listOf("King", "Sing", "Wing"), "Box"),
+      RhymeFamilyItem("Light", "💡", listOf("Night", "Bright", "Kite"), "Frog"),
+    )
+
+  // Level 5: 5 Illustrated Picture Stories with Spelling & Comprehension (Class 2)
+  val pictureStories: List<PictureStoryItem> =
+    listOf(
+      PictureStoryItem(
+        title = "Aarav's Little Red Kite",
+        emojiBanner = "👦🪁🌤️",
+        lines =
+          listOf(
+            "Aarav has a bright red kite with a long tail.",
+            "He runs into the green park with his playful dog Bruno.",
+            "A cool wind blows and lifts the kite high above the trees.",
+            "Aarav claps happily as his kite dances in the blue sky!",
+          ),
+        hinglishSummary = "Aarav apni laal patang aur puppy Bruno ke saath park mein gaya aur hawa mein patang udi!",
+        blankPrompt = "The kite dances in the blue _____.",
+        blankOptions = listOf("sky", "cup", "box"),
+        blankCorrectIndex = 0,
+        comprehensionQuestion = "Who went to the park with Aarav?",
+        comprehensionOptions = listOf("His dog Bruno", "A whale", "A lion"),
+        comprehensionCorrectIndex = 0,
+      ),
+      PictureStoryItem(
+        title = "Pip the Friendly Frog",
+        emojiBanner = "🐸🪷🌧️",
+        lines =
+          listOf(
+            "Pip is a tiny green frog who lives near a blue pond.",
+            "Every morning, he sits on a big round lotus leaf.",
+            "When soft raindrops fall from dark clouds, Pip smiles wide.",
+            "He jumps into the cool water with a happy splash!",
+          ),
+        hinglishSummary = "Chhota hara mendhak Pip kamal ke patte par baith kar baarish mein khush hokar paani mein koodta hai!",
+        blankPrompt = "Pip is a tiny _____ frog.",
+        blankOptions = listOf("green", "chair", "train"),
+        blankCorrectIndex = 0,
+        comprehensionQuestion = "Where does Pip sit every morning?",
+        comprehensionOptions = listOf("On a lotus leaf", "Inside a van", "On a bed"),
+        comprehensionCorrectIndex = 0,
+      ),
+      PictureStoryItem(
+        title = "Maya and the Lost Puppy",
+        emojiBanner = "👧🐶🏡",
+        lines =
+          listOf(
+            "Maya heard a soft sound near her garden gate.",
+            "She saw a tiny brown puppy shivering in the cold.",
+            "Maya gave him warm milk and wrapped him in a soft towel.",
+            "Soon his tail wagged fast — Maya had found a new best friend!",
+          ),
+        hinglishSummary = "Maya ne garden ke bahar mile chhote puppy ko garam doodh pilaya aur woh uska best friend ban gaya!",
+        blankPrompt = "Maya gave the puppy _____ milk.",
+        blankOptions = listOf("warm", "heavy", "sharp"),
+        blankCorrectIndex = 0,
+        comprehensionQuestion = "How did Maya help the little puppy?",
+        comprehensionOptions = listOf("Gave warm milk and towel", "Left him outside", "Hid his toys"),
+        comprehensionCorrectIndex = 0,
+      ),
+      PictureStoryItem(
+        title = "The Sharing Mango Tree",
+        emojiBanner = "🌳🥭🦜",
+        lines =
+          listOf(
+            "A tall mango tree stood at the center of Ananya's village.",
+            "In summer, sweet golden mangoes hung from every branch.",
+            "Green parrots ate from the top while children shared below.",
+            "The tree felt proud to give cool shade and sweet fruit to all!",
+          ),
+        hinglishSummary = "Gaon ke bade aam ke ped ne tote aur bacchon sabko thandi chhaon aur meethe aam diye!",
+        blankPrompt = "Sweet golden _____ hung from every branch.",
+        blankOptions = listOf("mangoes", "clocks", "wheels"),
+        blankCorrectIndex = 0,
+        comprehensionQuestion = "Who ate mangoes from the top branches?",
+        comprehensionOptions = listOf("Green parrots", "Big whales", "Tiny crabs"),
+        comprehensionCorrectIndex = 0,
+      ),
+      PictureStoryItem(
+        title = "Kabir's Bright Morning",
+        emojiBanner = "☀️🪥🎒",
+        lines =
+          listOf(
+            "Kabir wakes up early when the golden sun rises.",
+            "He brushes his teeth, drinks warm milk, and packs his blue bag.",
+            "Before leaving, he hugs his mom and dad with a big smile.",
+            "Kabir walks to school ready to read, blend, and learn new words!",
+          ),
+        hinglishSummary = "Kabir subah jaldi uthkar brush karta hai, doodh peeta hai, aur khushi se school jaata hai!",
+        blankPrompt = "Kabir wakes up when the golden _____ rises.",
+        blankOptions = listOf("sun", "drum", "fox"),
+        blankCorrectIndex = 0,
+        comprehensionQuestion = "What color is Kabir's school bag?",
+        comprehensionOptions = listOf("Blue", "Green", "Pink"),
+        comprehensionCorrectIndex = 0,
+      ),
+    )
+}

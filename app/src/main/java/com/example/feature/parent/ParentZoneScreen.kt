@@ -226,6 +226,8 @@ fun ParentZoneScreen(
   profile: LearnerProfile,
   progressByLetter: Map<String, LetterProgress>,
   timerState: SessionTimerUiState,
+  unlockedBadgesCount: Int = 0,
+  totalBadgesCount: Int = 13,
   onSelectTimerPreset: (ScreenTimePreset) -> Unit,
   onTriggerBreakPreview: () -> Unit,
   onBack: () -> Unit,
@@ -255,12 +257,14 @@ fun ParentZoneScreen(
     }
 
   val reportText =
-    remember(profile, masteredLetters, timerState) {
+    remember(profile, masteredLetters, timerState, unlockedBadgesCount, totalBadgesCount) {
       buildWhatsAppReportMessage(
         profile = profile,
         masteredLetters = masteredLetters.map { it.letter },
         wordsBlendedToday = timerState.wordsBlendedToday,
         sessionDuration = timerState.formattedElapsedMinutes,
+        unlockedBadgesCount = unlockedBadgesCount,
+        totalBadgesCount = totalBadgesCount,
       )
     }
 
@@ -464,15 +468,15 @@ fun ParentZoneScreen(
                 modifier = Modifier.weight(1f),
               )
               ParentMetricTile(
-                value = "${masteredLetters.size}/26",
-                label = "Mastered",
-                accent = MintGreen,
+                value = "$unlockedBadgesCount/$totalBadgesCount",
+                label = "Badges",
+                accent = PlumPurple,
                 modifier = Modifier.weight(1f),
               )
               ParentMetricTile(
-                value = "${timerState.wordsBlendedToday}",
-                label = "Words Blended",
-                accent = SkyTeal,
+                value = "${masteredLetters.size}/26",
+                label = "Mastered",
+                accent = MintGreen,
                 modifier = Modifier.weight(1f),
               )
             }
@@ -713,13 +717,15 @@ fun buildWhatsAppReportMessage(
   masteredLetters: List<String>,
   wordsBlendedToday: Int,
   sessionDuration: String,
+  unlockedBadgesCount: Int = 0,
+  totalBadgesCount: Int = 13,
 ): String {
   val lettersText =
     if (masteredLetters.isEmpty()) "Starting SATPIN Group 1 (S, A, T, P, I, N)"
     else masteredLetters.joinToString(", ")
   return buildString {
     append("🌟 BolBuddy Daily Report for ${profile.childName} 🌟\n")
-    append("⭐ Total Stars: ${profile.totalStars}\n")
+    append("⭐ Total Stars: ${profile.totalStars} | 🏆 Badges: $unlockedBadgesCount/$totalBadgesCount\n")
     append("🔤 Mastered Sounds (${masteredLetters.size}/26): $lettersText\n")
     append("🪄 Words Blended Today: $wordsBlendedToday\n")
     append("⏱️ Active Learning Time: $sessionDuration\n")

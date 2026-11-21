@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -21,12 +22,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Button
@@ -60,7 +64,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
-import com.example.domain.curriculum.EarlyCurriculumCatalog
+import com.example.domain.curriculum.UpperCurriculumCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -73,13 +77,14 @@ import com.example.ui.theme.TangerineOrange
 fun Class1FluencyScreen(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit = {},
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   BackHandler(onBack = onBack)
 
   var selectedTab by remember { mutableIntStateOf(0) }
-  val tabs = listOf("Blends (bl, gr, st)", "Sentence Reader")
+  val tabs = listOf("Blends (12)", "Sentence Reader (10)")
 
   Scaffold(
     modifier = modifier.fillMaxSize(),
@@ -146,7 +151,11 @@ fun Class1FluencyScreen(
         if (selectedTab == 0) {
           BlendsTab(languageMode = languageMode, audioPlayer = audioPlayer)
         } else {
-          SentenceReaderTab(languageMode = languageMode, audioPlayer = audioPlayer)
+          SentenceReaderTab(
+            languageMode = languageMode,
+            audioPlayer = audioPlayer,
+            onAwardStars = onAwardStars,
+          )
         }
       }
     }
@@ -159,13 +168,37 @@ private fun BlendsTab(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
 ) {
-  val blends = EarlyCurriculumCatalog.blends
+  val blends = UpperCurriculumCatalog.blends
   var selectedIdx by remember { mutableIntStateOf(0) }
   val item = blends[selectedIdx]
 
   Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      blends.forEachIndexed { idx, cluster ->
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Text(
+        text = "Consonant Blends",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+      Surface(color = TangerineOrange.copy(alpha = 0.18f), shape = RoundedCornerShape(50)) {
+        Text(
+          text = "Blend ${selectedIdx + 1} of ${blends.size}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = InkNavy,
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+      }
+    }
+
+    LazyRow(
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      contentPadding = PaddingValues(vertical = 2.dp),
+    ) {
+      itemsIndexed(blends) { idx, cluster ->
         FilterChip(
           selected = selectedIdx == idx,
           onClick = {
@@ -244,7 +277,7 @@ private fun BlendsTab(
       }
     }
 
-    Text("Tap words starting with '${item.blend}':", style = MaterialTheme.typography.titleMedium)
+    Text("Tap words starting with '${item.blend}' (${item.sampleWords.size} examples):", style = MaterialTheme.typography.titleMedium)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
       item.sampleWords.forEach { word ->
         Surface(
@@ -272,6 +305,28 @@ private fun BlendsTab(
         }
       }
     }
+
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      OutlinedButton(
+        onClick = { selectedIdx = (selectedIdx - 1 + blends.size) % blends.size },
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
+      ) {
+        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Prev Blend", fontWeight = FontWeight.Bold)
+      }
+      Button(
+        onClick = { selectedIdx = (selectedIdx + 1) % blends.size },
+        colors = ButtonDefaults.buttonColors(containerColor = TangerineOrange, contentColor = InkNavy),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
+      ) {
+        Text("Next Blend", fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.width(6.dp))
+        Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
+      }
+    }
   }
 }
 
@@ -280,8 +335,9 @@ private fun BlendsTab(
 private fun SentenceReaderTab(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit,
 ) {
-  val sentences = EarlyCurriculumCatalog.fluencySentences
+  val sentences = UpperCurriculumCatalog.fluencySentences
   var sentenceIdx by remember { mutableIntStateOf(0) }
   val item = sentences[sentenceIdx]
   var pickedOption by remember(sentenceIdx) { mutableStateOf<Int?>(null) }
@@ -290,12 +346,36 @@ private fun SentenceReaderTab(
   val words = remember(sentenceIdx) { item.sentence.split(" ") }
 
   Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      sentences.forEachIndexed { idx, s ->
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Text(
+        text = "Guided Sentence Practice",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+      Surface(color = SkyTeal.copy(alpha = 0.14f), shape = RoundedCornerShape(50)) {
+        Text(
+          text = "Sentence ${sentenceIdx + 1} of ${sentences.size}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = SkyTeal,
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+      }
+    }
+
+    LazyRow(
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      contentPadding = PaddingValues(vertical = 2.dp),
+    ) {
+      itemsIndexed(sentences) { idx, s ->
         FilterChip(
           selected = sentenceIdx == idx,
           onClick = { sentenceIdx = idx },
-          label = { Text("${s.emoji} Story #${idx + 1}", fontWeight = FontWeight.Bold) },
+          label = { Text("${s.emoji} #${idx + 1}", fontWeight = FontWeight.Bold) },
           modifier = Modifier.minimumInteractiveComponentSize(),
         )
       }
@@ -421,6 +501,7 @@ private fun SentenceReaderTab(
                 pickedOption = idx
                 if (isCorrect) {
                   solved = true
+                  onAwardStars(2)
                   audioPlayer.playCelebrationChime()
                 } else {
                   audioPlayer.playGentleTryAgain()
@@ -443,9 +524,31 @@ private fun SentenceReaderTab(
         if (solved) {
           Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
             Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MintGreen)
-            Text("Shabaash! Great reading!", style = MaterialTheme.typography.titleSmall, color = InkNavy)
+            Text("Shabaash! Great reading! (+2 ⭐)", style = MaterialTheme.typography.titleSmall, color = InkNavy)
           }
         }
+      }
+    }
+
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      OutlinedButton(
+        onClick = { sentenceIdx = (sentenceIdx - 1 + sentences.size) % sentences.size },
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
+      ) {
+        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Prev Sentence", fontWeight = FontWeight.Bold)
+      }
+      Button(
+        onClick = { sentenceIdx = (sentenceIdx + 1) % sentences.size },
+        colors = ButtonDefaults.buttonColors(containerColor = CoralPrimary),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
+      ) {
+        Text("Next Sentence", fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.width(6.dp))
+        Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
       }
     }
   }

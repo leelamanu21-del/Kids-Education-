@@ -8,6 +8,8 @@ import com.example.domain.model.LanguageMode
 import com.example.domain.model.LearnerProfile
 import com.example.domain.model.LearningMode
 import com.example.domain.model.LetterProgress
+import com.example.domain.model.RewardStageIds
+import com.example.domain.model.StageProgress
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FieldValue
@@ -76,6 +78,33 @@ class PhonicsProgressRepository(
             DocumentSnapshot.ServerTimestampBehavior.ESTIMATE,
           )
           .associateBy { it.letter }
+      }
+      .catch { error ->
+        val firestoreError =
+          generateSequence(error) { it.cause }
+            .filterIsInstance<FirebaseFirestoreException>()
+            .firstOrNull()
+        if (firestoreError == null && error is CancellationException) throw error
+        val exceptionToLog = firestoreError ?: (error as? Exception)
+        if (exceptionToLog != null && auth.currentUser?.uid == userId) {
+          handleFirestoreError(exceptionToLog, OperationType.LIST, collectionRef.path)
+        }
+        throw error
+      }
+      .collect { emit(it) }
+  }
+
+  fun observeStageProgress(userId: String): Flow<Map<String, StageProgress>> = flow {
+    val collectionRef = db.collection("users").document(userId).collection("stage_progress")
+    collectionRef
+      .snapshots()
+      .map { snapshot ->
+        snapshot
+          .toObjects(
+            StageProgress::class.java,
+            DocumentSnapshot.ServerTimestampBehavior.ESTIMATE,
+          )
+          .associateBy { it.stageId }
       }
       .catch { error ->
         val firestoreError =
@@ -242,6 +271,67 @@ class PhonicsProgressRepository(
       throw e
     } catch (e: Exception) {
       handleFirestoreError(e, OperationType.WRITE, letterPath)
+      Result.failure(e)
+    }
+  }
+
+  suspend fun recordStageReward(
+    stageId: String,
+    starsEarnedDelta: Int,
+  ): Result<Unit> {
+    if (stageId !in RewardStageIds.ALL) {
+      return Result.failure(IllegalArgumentException("Unsupported stageId: $stageId"))
+    }
+    var stagePath = "users/${auth.currentUser?.uid ?: "unauthenticated"}/stage_progress/$stageId"
+    return try {
+      val uid = requireUserId()
+      val safeStars = starsEarnedDelta.coerceIn(1, 5).toLong()
+      val stageRef =
+        db.collection("users").document(uid).collection("stage_progress").document(stageId)
+      stagePath = stageRef.path
+      val profileRef = db.collection("users").document(uid)
+
+      val existingSnap = stageRef.get().await()
+      if (!existingSnap.exists()) {
+        val createPayload =
+          mapOf(
+            "userId" to uid,
+            "stageId" to stageId,
+            "starsEarned" to safeStars,
+            "completionsCount" to 1L,
+            "createdAt" to FieldValue.serverTimestamp(),
+            "updatedAt" to FieldValue.serverTimestamp(),
+          )
+        stageRef.set(createPayload).await()
+      } else {
+        val prevStars = existingSnap.getLong("starsEarned") ?: 0L
+        val prevCompletions = existingSnap.getLong("completionsCount") ?: 0L
+        val updatePayload =
+          mapOf(
+            "starsEarned" to (prevStars + safeStars).coerceAtMost(5000L),
+            "completionsCount" to (prevCompletions + 1L).coerceAtMost(10000L),
+            "updatedAt" to FieldValue.serverTimestamp(),
+          )
+        stageRef.update(updatePayload).await()
+      }
+
+      val profileSnap = profileRef.get().await()
+      if (profileSnap.exists()) {
+        val currentTotalStars = profileSnap.getLong("totalStars") ?: 0L
+        profileRef
+          .update(
+            mapOf(
+              "totalStars" to (currentTotalStars + safeStars).coerceAtMost(10000L),
+              "updatedAt" to FieldValue.serverTimestamp(),
+            )
+          )
+          .await()
+      }
+      Result.success(Unit)
+    } catch (e: CancellationException) {
+      throw e
+    } catch (e: Exception) {
+      handleFirestoreError(e, OperationType.WRITE, stagePath)
       Result.failure(e)
     }
   }

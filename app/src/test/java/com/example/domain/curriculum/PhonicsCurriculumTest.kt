@@ -49,4 +49,29 @@ class PhonicsCurriculumTest {
     assertTrue(report.contains("S, A, T"))
     assertTrue(report.contains("Words Blended Today: 4"))
   }
+
+  @Test
+  fun expandedCurriculumCatalogs_meetCountAndIntegrityChecks() {
+    assertTrue(PhonicsCurriculum.letters.all { it.sampleWords.size == 6 })
+    assertEquals(32, PhonicsCurriculum.cvcWords.size)
+    assertTrue(PhonicsCurriculum.cvcWords.all { it.word.length == 3 })
+
+    assertEquals(24, EarlyCurriculumCatalog.sightWords.size)
+    assertEquals(8, EarlyCurriculumCatalog.wordFamilies.size)
+    assertEquals(9, EarlyCurriculumCatalog.digraphs.size)
+    assertEquals(12, EarlyCurriculumCatalog.magicEWords.size)
+
+    assertEquals(12, UpperCurriculumCatalog.blends.size)
+    assertEquals(10, UpperCurriculumCatalog.fluencySentences.size)
+    assertTrue(UpperCurriculumCatalog.fluencySentences.all { it.correctOptionIndex in it.quizOptions.indices })
+    assertEquals(18, UpperCurriculumCatalog.grammarItems.size)
+    assertEquals(14, UpperCurriculumCatalog.opposites.size)
+    assertEquals(8, UpperCurriculumCatalog.rhymeFamilies.size)
+    assertTrue(UpperCurriculumCatalog.rhymeFamilies.all { it.oddOneOut !in it.rhymingWords })
+    assertEquals(5, UpperCurriculumCatalog.pictureStories.size)
+    assertTrue(UpperCurriculumCatalog.pictureStories.all {
+      it.blankCorrectIndex in it.blankOptions.indices &&
+        it.comprehensionCorrectIndex in it.comprehensionOptions.indices
+    })
+  }
 }

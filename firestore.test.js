@@ -164,3 +164,70 @@ test("Owner can write and list own letter_progress with valid schema, invalid le
       })
   );
 });
+
+test("Owner can create, update, and list stage_progress while cross-user and invalid stages fail", async () => {
+  const aliceDb = testEnv.authenticatedContext(ALICE_UID).firestore();
+  const bobDb = testEnv.authenticatedContext(BOB_UID).firestore();
+  const pastTime = new Date(Date.now() - 2000);
+
+  await assertSucceeds(
+    aliceDb
+      .collection("users")
+      .doc(ALICE_UID)
+      .collection("stage_progress")
+      .doc("level2_blender")
+      .set({
+        userId: ALICE_UID,
+        stageId: "level2_blender",
+        starsEarned: 2,
+        completionsCount: 1,
+        createdAt: pastTime,
+        updatedAt: pastTime,
+      })
+  );
+
+  await assertSucceeds(
+    aliceDb
+      .collection("users")
+      .doc(ALICE_UID)
+      .collection("stage_progress")
+      .doc("level2_blender")
+      .update({
+        starsEarned: 4,
+        completionsCount: 2,
+        updatedAt: new Date(Date.now() - 1000),
+      })
+  );
+
+  await assertSucceeds(
+    aliceDb
+      .collection("users")
+      .doc(ALICE_UID)
+      .collection("stage_progress")
+      .get()
+  );
+
+  await assertFails(
+    bobDb
+      .collection("users")
+      .doc(ALICE_UID)
+      .collection("stage_progress")
+      .get()
+  );
+
+  await assertFails(
+    aliceDb
+      .collection("users")
+      .doc(ALICE_UID)
+      .collection("stage_progress")
+      .doc("unknown_stage")
+      .set({
+        userId: ALICE_UID,
+        stageId: "unknown_stage",
+        starsEarned: 10,
+        completionsCount: 1,
+        createdAt: pastTime,
+        updatedAt: pastTime,
+      })
+  );
+});

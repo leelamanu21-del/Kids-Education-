@@ -244,7 +244,7 @@ fun LetterLessonScreen(
               Button(
                 onClick = {
                   bounceTrigger = true
-                  audioPlayer.speakPhonemeOnly(letter)
+                  audioPlayer.speakPhonemeOnly(letter, languageMode)
                 },
                 colors =
                   ButtonDefaults.buttonColors(
@@ -492,7 +492,7 @@ fun LetterLessonScreen(
                 modifier = Modifier.weight(1f),
               )
               IconButton(
-                onClick = { audioPlayer.speakPhonemeOnly(letter) },
+                onClick = { audioPlayer.speakPhonemeOnly(letter, languageMode) },
                 modifier = Modifier.minimumInteractiveComponentSize(),
               ) {
                 Icon(
@@ -538,7 +538,7 @@ fun LetterLessonScreen(
                         onCompleteLesson(stars, score, true)
                       } else {
                         audioPlayer.playGentleTryAgain()
-                        audioPlayer.speakPhonemeOnly(letter)
+                        audioPlayer.speakPhonemeOnly(letter, languageMode)
                       }
                     }
                   },

@@ -15,8 +15,8 @@ enum class CourseLevelId(
     ageTag = "Age 3-4",
     titleEnglish = "Phonics & Alphabets",
     titleHinglish = "Akshar aur Awaazein",
-    subtitleEnglish = "SATPIN & A-Z letter sounds",
-    subtitleHinglish = "SATPIN aur A-Z ki awaazein",
+    subtitleEnglish = "26 letter sounds · 156 example words",
+    subtitleHinglish = "26 awaazein · 156 shabd examples",
   ),
   LEVEL_2_BLENDING(
     levelNumber = 2,
@@ -24,8 +24,8 @@ enum class CourseLevelId(
     ageTag = "Age 3-4",
     titleEnglish = "CVC Blending & Sight Words",
     titleHinglish = "Shabd Jodo & Sight Words",
-    subtitleEnglish = "c-a-t = cat & tricky words",
-    subtitleHinglish = "3-letter jodo aur tricky words",
+    subtitleEnglish = "32 CVC blending words · 4 groups",
+    subtitleHinglish = "32 CVC shabd · 4 groups mein sikhein",
   ),
   LEVEL_3_UKG(
     levelNumber = 3,
@@ -33,8 +33,8 @@ enum class CourseLevelId(
     ageTag = "Age 4-5",
     titleEnglish = "Word Families, Digraphs & Magic E",
     titleHinglish = "Word Families, Digraphs & Magic E",
-    subtitleEnglish = "-at/-an, ch/sh/th & cap → cape",
-    subtitleHinglish = "bat-cat, sh-ip aur Magic 'e'",
+    subtitleEnglish = "8 families · 9 digraphs · 12 Magic E",
+    subtitleHinglish = "8 families · 9 digraphs · 12 Magic 'e'",
   ),
   LEVEL_4_CLASS1(
     levelNumber = 4,
@@ -42,8 +42,8 @@ enum class CourseLevelId(
     ageTag = "Age 5-6",
     titleEnglish = "Blends & Sentence Reading",
     titleHinglish = "Blends aur Vaakya Padhna",
-    subtitleEnglish = "bl/gr/st clusters & short sentences",
-    subtitleHinglish = "bl-ue, st-ar aur saral vaakya",
+    subtitleEnglish = "12 blends (60 words) · 10 sentences",
+    subtitleHinglish = "12 blends (60 shabd) · 10 vaakya",
   ),
   LEVEL_5_CLASS2(
     levelNumber = 5,
@@ -51,8 +51,8 @@ enum class CourseLevelId(
     ageTag = "Age 6-7",
     titleEnglish = "Grammar, Opposites & Stories",
     titleHinglish = "Grammar, Vilom aur Kahaniyan",
-    subtitleEnglish = "Nouns/Verbs, Opposites & Picture Stories",
-    subtitleHinglish = "Sangya-Kriya, Ulte Shabd & Stories",
+    subtitleEnglish = "18 grammar · 14 opposites · 5 stories",
+    subtitleHinglish = "18 grammar · 14 vilom · 5 kahaniyan",
   ),
 }
 
@@ -98,6 +98,7 @@ data class MagicEWordPair(
   val magicWord: String,
   val magicMeaning: String,
   val magicEmoji: String,
+  val vowelRuleTag: String,
   val hinglishRuleTip: String,
   val hindiVoiceScript: String,
 )

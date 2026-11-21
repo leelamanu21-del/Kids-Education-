@@ -27,7 +27,7 @@ object PhonicsCurriculum {
         englishCue = "S says /s/ like a slithering snake and bright Sun!",
         hinglishAudioScript = "S ki awaaz hai sss, jaise Suraj aur Sun!",
         englishAudioScript = "S makes the sound sss, as in Sun!",
-        sampleWords = listOf("Sun", "Sit", "Sip", "Star"),
+        sampleWords = listOf("Sun", "Sit", "Sip", "Star", "Sock", "Smile"),
         palette = TilePalette.SUNSHINE,
       ),
       PhonicsLetter(
@@ -46,7 +46,7 @@ object PhonicsCurriculum {
         englishCue = "A says /a/ like ants crawling on an apple!",
         hinglishAudioScript = "A ki awaaz hai aah, jaise Ant aur Apple!",
         englishAudioScript = "A makes the sound aah, as in Ant and Apple!",
-        sampleWords = listOf("Ant", "Apple", "Axe", "At"),
+        sampleWords = listOf("Ant", "Apple", "Axe", "At", "Arrow", "Astronaut"),
         palette = TilePalette.CORAL,
       ),
       PhonicsLetter(
@@ -65,7 +65,7 @@ object PhonicsCurriculum {
         englishCue = "T says /t/ like a dripping tap and ticking clock!",
         hinglishAudioScript = "T ki awaaz hai tuh, jaise Tap aur Tiger!",
         englishAudioScript = "T makes the sound tuh, as in Tap and Tiger!",
-        sampleWords = listOf("Tap", "Tin", "Top", "Tiger"),
+        sampleWords = listOf("Tap", "Tin", "Top", "Tiger", "Tent", "Table"),
         palette = TilePalette.SKY_TEAL,
       ),
       PhonicsLetter(
@@ -84,7 +84,7 @@ object PhonicsCurriculum {
         englishCue = "P says /p/ like popping popcorn in a pan!",
         hinglishAudioScript = "P ki awaaz hai puh, jaise Patang, Pan aur Parrot!",
         englishAudioScript = "P makes the sound puh, as in Pan and Popcorn!",
-        sampleWords = listOf("Pan", "Pin", "Pat", "Pop"),
+        sampleWords = listOf("Pan", "Pin", "Pat", "Pop", "Pen", "Parrot"),
         palette = TilePalette.PLUM,
       ),
       PhonicsLetter(
@@ -103,7 +103,7 @@ object PhonicsCurriculum {
         englishCue = "I says /i/ like Inky the mouse in an igloo!",
         hinglishAudioScript = "I ki awaaz hai ih, jaise Igloo aur Ink!",
         englishAudioScript = "I makes the sound ih, as in Igloo and Ink!",
-        sampleWords = listOf("Igloo", "In", "Ink", "It"),
+        sampleWords = listOf("Igloo", "In", "Ink", "It", "Insect", "India"),
         palette = TilePalette.MINT,
       ),
       PhonicsLetter(
@@ -122,7 +122,7 @@ object PhonicsCurriculum {
         englishCue = "N says /n/ like a buzzing airplane flying over a net!",
         hinglishAudioScript = "N ki awaaz hai nnn, jaise Net aur Nap!",
         englishAudioScript = "N makes the sound nnn, as in Net and Nest!",
-        sampleWords = listOf("Net", "Nap", "Nip", "Nest"),
+        sampleWords = listOf("Net", "Nap", "Nip", "Nest", "Nut", "Nose"),
         palette = TilePalette.TANGERINE,
       ),
 
@@ -143,7 +143,7 @@ object PhonicsCurriculum {
         englishCue = "C says /k/ like clicking castanets and a cozy cat!",
         hinglishAudioScript = "C ki awaaz hai kuh, jaise Cat aur Cup!",
         englishAudioScript = "C makes the sound kuh, as in Cat and Cake!",
-        sampleWords = listOf("Cat", "Cup", "Cap", "Can"),
+        sampleWords = listOf("Cat", "Cup", "Cap", "Can", "Cake", "Camel"),
         palette = TilePalette.CORAL,
       ),
       PhonicsLetter(
@@ -162,7 +162,7 @@ object PhonicsCurriculum {
         englishCue = "K says /k/ like a colorful kite soaring high!",
         hinglishAudioScript = "K ki awaaz hai kuh, jaise Kite aur King!",
         englishAudioScript = "K makes the sound kuh, as in Kite and King!",
-        sampleWords = listOf("Kite", "Kid", "Kit", "King"),
+        sampleWords = listOf("Kite", "Kid", "Kit", "King", "Key", "Kettle"),
         palette = TilePalette.SKY_TEAL,
       ),
       PhonicsLetter(
@@ -181,7 +181,7 @@ object PhonicsCurriculum {
         englishCue = "E says /e/ like cracking an egg into a pan!",
         hinglishAudioScript = "E ki awaaz hai eh, jaise Egg aur Elephant!",
         englishAudioScript = "E makes the sound eh, as in Egg and Elephant!",
-        sampleWords = listOf("Egg", "End", "Elf", "Elephant"),
+        sampleWords = listOf("Egg", "End", "Elf", "Elephant", "Elbow", "Engine"),
         palette = TilePalette.SUNSHINE,
       ),
       PhonicsLetter(
@@ -200,7 +200,7 @@ object PhonicsCurriculum {
         englishCue = "H says /h/ like panting after hopping in a hat!",
         hinglishAudioScript = "H ki awaaz hai huh, jaise Hat aur Hen!",
         englishAudioScript = "H makes the sound huh, as in Hat and Hen!",
-        sampleWords = listOf("Hat", "Hen", "Hop", "Hit"),
+        sampleWords = listOf("Hat", "Hen", "Hop", "Hit", "Hut", "House"),
         palette = TilePalette.MINT,
       ),
       PhonicsLetter(
@@ -219,7 +219,7 @@ object PhonicsCurriculum {
         englishCue = "R says /r/ like a playful puppy tugging a rag!",
         hinglishAudioScript = "R ki awaaz hai rrr, jaise Rat aur Red!",
         englishAudioScript = "R makes the sound rrr, as in Rat and Rainbow!",
-        sampleWords = listOf("Rat", "Red", "Run", "Rip"),
+        sampleWords = listOf("Rat", "Red", "Run", "Rip", "Rain", "Rabbit"),
         palette = TilePalette.TANGERINE,
       ),
       PhonicsLetter(
@@ -238,7 +238,7 @@ object PhonicsCurriculum {
         englishCue = "M says /m/ when rubbing your tummy for a yummy meal!",
         hinglishAudioScript = "M ki awaaz hai mmm, jaise Mango aur Mat!",
         englishAudioScript = "M makes the sound mmm, as in Mat and Moon!",
-        sampleWords = listOf("Mat", "Man", "Map", "Mango"),
+        sampleWords = listOf("Mat", "Man", "Map", "Mango", "Moon", "Milk"),
         palette = TilePalette.PLUM,
       ),
       PhonicsLetter(
@@ -257,7 +257,7 @@ object PhonicsCurriculum {
         englishCue = "D says /d/ like beating a big marching drum!",
         hinglishAudioScript = "D ki awaaz hai duh, jaise Drum aur Dog!",
         englishAudioScript = "D makes the sound duh, as in Drum and Dog!",
-        sampleWords = listOf("Dad", "Dip", "Dog", "Drum"),
+        sampleWords = listOf("Dad", "Dip", "Dog", "Drum", "Duck", "Door"),
         palette = TilePalette.CORAL,
       ),
 
@@ -278,7 +278,7 @@ object PhonicsCurriculum {
         englishCue = "G says /g/ like water gurgling down the drain!",
         hinglishAudioScript = "G ki awaaz hai guh, jaise Goat aur Grapes!",
         englishAudioScript = "G makes the sound guh, as in Goat and Grapes!",
-        sampleWords = listOf("Goat", "Gap", "Get", "Got"),
+        sampleWords = listOf("Goat", "Gap", "Get", "Got", "Grapes", "Garden"),
         palette = TilePalette.MINT,
       ),
       PhonicsLetter(
@@ -297,7 +297,7 @@ object PhonicsCurriculum {
         englishCue = "O says /o/ like turning the light switch on and off!",
         hinglishAudioScript = "O ki awaaz hai aw, jaise Orange aur Octopus!",
         englishAudioScript = "O makes the sound aw, as in Orange and Octopus!",
-        sampleWords = listOf("On", "Pot", "Top", "Orange"),
+        sampleWords = listOf("On", "Pot", "Top", "Orange", "Octopus", "Ox"),
         palette = TilePalette.TANGERINE,
       ),
       PhonicsLetter(
@@ -316,7 +316,7 @@ object PhonicsCurriculum {
         englishCue = "U says /u/ as umbrellas go up in the rain!",
         hinglishAudioScript = "U ki awaaz hai uh, jaise Up aur Umbrella!",
         englishAudioScript = "U makes the sound uh, as in Up and Umbrella!",
-        sampleWords = listOf("Up", "Sun", "Cup", "Umbrella"),
+        sampleWords = listOf("Up", "Sun", "Cup", "Umbrella", "Uncle", "Under"),
         palette = TilePalette.PLUM,
       ),
       PhonicsLetter(
@@ -335,7 +335,7 @@ object PhonicsCurriculum {
         englishCue = "L says /l/ like licking a sweet lemon lollipop!",
         hinglishAudioScript = "L ki awaaz hai lll, jaise Lollipop aur Lion!",
         englishAudioScript = "L makes the sound lll, as in Lollipop and Lion!",
-        sampleWords = listOf("Lip", "Leg", "Log", "Lollipop"),
+        sampleWords = listOf("Lip", "Leg", "Log", "Lollipop", "Lion", "Leaf"),
         palette = TilePalette.CORAL,
       ),
       PhonicsLetter(
@@ -354,7 +354,7 @@ object PhonicsCurriculum {
         englishCue = "F says /f/ like air whooshing from a floating fish!",
         hinglishAudioScript = "F ki awaaz hai fff, jaise Fish aur Fan!",
         englishAudioScript = "F makes the sound fff, as in Fish and Fan!",
-        sampleWords = listOf("Fan", "Fat", "Fun", "Fish"),
+        sampleWords = listOf("Fan", "Fat", "Fun", "Fish", "Frog", "Flower"),
         palette = TilePalette.SKY_TEAL,
       ),
       PhonicsLetter(
@@ -373,7 +373,7 @@ object PhonicsCurriculum {
         englishCue = "B says /b/ like bouncing a big bouncy ball!",
         hinglishAudioScript = "B ki awaaz hai buh, jaise Ball aur Bus!",
         englishAudioScript = "B makes the sound buh, as in Ball and Bat!",
-        sampleWords = listOf("Bat", "Bus", "Bed", "Ball"),
+        sampleWords = listOf("Bat", "Bus", "Bed", "Ball", "Book", "Banana"),
         palette = TilePalette.SUNSHINE,
       ),
 
@@ -394,7 +394,7 @@ object PhonicsCurriculum {
         englishCue = "J says /j/ like jiggling jelly on a plate!",
         hinglishAudioScript = "J ki awaaz hai juh, jaise Jam aur Jug!",
         englishAudioScript = "J makes the sound juh, as in Jam and Jump!",
-        sampleWords = listOf("Jam", "Jet", "Jug", "Jump"),
+        sampleWords = listOf("Jam", "Jet", "Jug", "Jump", "Jar", "Jeep"),
         palette = TilePalette.CORAL,
       ),
       PhonicsLetter(
@@ -413,7 +413,7 @@ object PhonicsCurriculum {
         englishCue = "Z says /z/ like a busy bee zipping to the zoo!",
         hinglishAudioScript = "Z ki awaaz hai zzz, jaise Zebra aur Zip!",
         englishAudioScript = "Z makes the sound zzz, as in Zebra and Zoo!",
-        sampleWords = listOf("Zip", "Zoo", "Zap", "Zebra"),
+        sampleWords = listOf("Zip", "Zoo", "Zap", "Zebra", "Zero", "Zigzag"),
         palette = TilePalette.PLUM,
       ),
       PhonicsLetter(
@@ -432,7 +432,7 @@ object PhonicsCurriculum {
         englishCue = "W says /w/ like the wind blowing across the water!",
         hinglishAudioScript = "W ki awaaz hai wuh, jaise Web aur Whale!",
         englishAudioScript = "W makes the sound wuh, as in Web and Wind!",
-        sampleWords = listOf("Web", "Wet", "Win", "Whale"),
+        sampleWords = listOf("Web", "Wet", "Win", "Whale", "Water", "Watch"),
         palette = TilePalette.SKY_TEAL,
       ),
       PhonicsLetter(
@@ -451,7 +451,7 @@ object PhonicsCurriculum {
         englishCue = "V says /v/ like driving Uncle Vic's vibrating van!",
         hinglishAudioScript = "V ki awaaz hai vvv, jaise Van aur Violin!",
         englishAudioScript = "V makes the sound vvv, as in Van and Vest!",
-        sampleWords = listOf("Van", "Vet", "Vest", "Violin"),
+        sampleWords = listOf("Van", "Vet", "Vest", "Violin", "Vase", "Vegetable"),
         palette = TilePalette.MINT,
       ),
       PhonicsLetter(
@@ -470,7 +470,7 @@ object PhonicsCurriculum {
         englishCue = "Y says /y/ like eating yummy yellow yogurt!",
         hinglishAudioScript = "Y ki awaaz hai yuh, jaise Yellow aur Yo-Yo!",
         englishAudioScript = "Y makes the sound yuh, as in Yes and Yellow!",
-        sampleWords = listOf("Yes", "Yak", "Yam", "Yellow"),
+        sampleWords = listOf("Yes", "Yak", "Yam", "Yellow", "Yo-Yo", "Yogurt"),
         palette = TilePalette.SUNSHINE,
       ),
       PhonicsLetter(
@@ -489,7 +489,7 @@ object PhonicsCurriculum {
         englishCue = "X says /ks/ like clicking an X-ray picture of a fox!",
         hinglishAudioScript = "X ki awaaz hai ks, jaise Box aur Fox!",
         englishAudioScript = "X makes the sound ks, as in Box and Fox!",
-        sampleWords = listOf("Box", "Fox", "Six", "Mix"),
+        sampleWords = listOf("Box", "Fox", "Six", "Mix", "Wax", "Taxi"),
         palette = TilePalette.TANGERINE,
       ),
       PhonicsLetter(
@@ -508,13 +508,14 @@ object PhonicsCurriculum {
         englishCue = "Q says /kw/ like a friendly duck going quack-quack!",
         hinglishAudioScript = "Q ki awaaz hai kwuh, jaise Queen aur Quack!",
         englishAudioScript = "Q makes the sound kwuh, as in Queen and Quilt!",
-        sampleWords = listOf("Queen", "Quiz", "Quack", "Quilt"),
+        sampleWords = listOf("Queen", "Quiz", "Quack", "Quilt", "Quick", "Quiet"),
         palette = TilePalette.PLUM,
       ),
     )
 
   val cvcWords: List<CvcWord> =
     listOf(
+      // Group 1: SATPIN Foundation (10 words)
       CvcWord("SAT", listOf("S", "A", "T"), "🪑", "Baith gaya (Sat)", 1),
       CvcWord("TAP", listOf("T", "A", "P"), "🚰", "Nal (Tap)", 1),
       CvcWord("PIN", listOf("P", "I", "N"), "📌", "Pin (Pin)", 1),
@@ -522,14 +523,34 @@ object PhonicsCurriculum {
       CvcWord("ANT", listOf("A", "N", "T"), "🐜", "Chinti (Ant)", 1),
       CvcWord("NAP", listOf("N", "A", "P"), "😴", "Chhoti neend (Nap)", 1),
       CvcWord("SIT", listOf("S", "I", "T"), "🧘", "Baithna (Sit)", 1),
+      CvcWord("PAT", listOf("P", "A", "T"), "🐾", "Thapthapana (Pat)", 1),
+      CvcWord("TIN", listOf("T", "I", "N"), "🥫", "Tin ka dabba", 1),
+      CvcWord("SIP", listOf("S", "I", "P"), "🧃", "Chuski lena (Sip)", 1),
+      // Group 2: Action Consonants CKEHRMD (8 words)
       CvcWord("CAT", listOf("C", "A", "T"), "🐱", "Billi (Cat)", 2),
       CvcWord("HAT", listOf("H", "A", "T"), "🎩", "Topi (Hat)", 2),
       CvcWord("MAT", listOf("M", "A", "T"), "🧶", "Chatai (Mat)", 2),
       CvcWord("RED", listOf("R", "E", "D"), "❤️", "Laal rang (Red)", 2),
+      CvcWord("HEN", listOf("H", "E", "N"), "🐔", "Murgi (Hen)", 2),
+      CvcWord("MAN", listOf("M", "A", "N"), "👨", "Aadmi (Man)", 2),
+      CvcWord("MAP", listOf("M", "A", "P"), "🗺️", "Naksha (Map)", 2),
+      CvcWord("RAT", listOf("R", "A", "T"), "🐭", "Chuha (Rat)", 2),
+      // Group 3: Story Builders GOULFB (8 words)
       CvcWord("SUN", listOf("S", "U", "N"), "☀️", "Suraj (Sun)", 3),
       CvcWord("DOG", listOf("D", "O", "G"), "🐶", "Kutta (Dog)", 3),
       CvcWord("BUS", listOf("B", "U", "S"), "🚌", "Bus", 3),
+      CvcWord("CUP", listOf("C", "U", "P"), "☕", "Cup", 3),
+      CvcWord("BAG", listOf("B", "A", "G"), "🎒", "Basta (Bag)", 3),
+      CvcWord("LOG", listOf("L", "O", "G"), "🪵", "Lakdi ka tukda (Log)", 3),
+      CvcWord("BED", listOf("B", "E", "D"), "🛏️", "Bistar (Bed)", 3),
+      CvcWord("BAT", listOf("B", "A", "T"), "🏏", "Balla (Bat)", 3),
+      // Group 4: Champion Sounds JZWVYXQ (6 words)
       CvcWord("FOX", listOf("F", "O", "X"), "🦊", "Lomdi (Fox)", 4),
+      CvcWord("BOX", listOf("B", "O", "X"), "📦", "Dibba (Box)", 4),
+      CvcWord("VAN", listOf("V", "A", "N"), "🚐", "School Van", 4),
+      CvcWord("JET", listOf("J", "E", "T"), "✈️", "Hawai Jet", 4),
+      CvcWord("WEB", listOf("W", "E", "B"), "🕸️", "Makdi ka Jaal (Web)", 4),
+      CvcWord("ZIP", listOf("Z", "I", "P"), "🤐", "Chain (Zip)", 4),
     )
 
   fun lettersForMode(mode: LearningMode): List<PhonicsLetter> =

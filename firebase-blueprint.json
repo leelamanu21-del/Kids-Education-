@@ -108,6 +108,54 @@
         "createdAt",
         "updatedAt"
       ]
+    },
+    "StageProgress": {
+      "title": "StageProgress",
+      "description": "Stars earned and completed activities for phonics course stages (Levels 2-5).",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "Owner Firebase Auth UID."
+        },
+        "stageId": {
+          "type": "string",
+          "enum": [
+            "level2_blender",
+            "level2_sight_words",
+            "level3_ukg",
+            "level4_class1",
+            "level5_class2"
+          ],
+          "description": "Course stage identifier."
+        },
+        "starsEarned": {
+          "type": "integer",
+          "description": "Total stars earned in this stage."
+        },
+        "completionsCount": {
+          "type": "integer",
+          "description": "Number of completed challenges or blends in this stage."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp() on creation."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp set via FieldValue.serverTimestamp() on updates."
+        }
+      },
+      "required": [
+        "userId",
+        "stageId",
+        "starsEarned",
+        "completionsCount",
+        "createdAt",
+        "updatedAt"
+      ]
     }
   },
   "firestore": {
@@ -122,6 +170,12 @@
         "$ref": "#/entities/LetterProgress"
       },
       "description": "Stores per-letter phonics mastery and star ratings scoped to the owner user."
+    },
+    "/users/{userId}/stage_progress/{stageId}": {
+      "schema": {
+        "$ref": "#/entities/StageProgress"
+      },
+      "description": "Stores stage stars and completion counts for Levels 2-5 scoped to the owner user."
     }
   }
 }

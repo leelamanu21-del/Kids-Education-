@@ -4,17 +4,23 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.data.repository.PhonicsProgressRepository
+import com.example.domain.curriculum.BadgeCatalog
 import com.example.domain.curriculum.PhonicsCurriculum
+import com.example.domain.model.BadgeProgress
+import com.example.domain.model.DigitalBadge
 import com.example.domain.model.LanguageMode
 import com.example.domain.model.LearnerProfile
+import com.example.domain.model.LearnerRank
 import com.example.domain.model.LearningMode
 import com.example.domain.model.LetterProgress
 import com.example.domain.model.PhonicsLetter
+import com.example.domain.model.StageProgress
 import com.google.firebase.firestore.FirebaseFirestoreException
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
@@ -31,12 +37,23 @@ sealed interface HomeUiState {
     val freeExplore: Boolean,
     val letters: List<PhonicsLetter>,
     val progressByLetter: Map<String, LetterProgress>,
+    val stageProgressById: Map<String, StageProgress>,
+    val badgeProgress: List<BadgeProgress>,
+    val unlockedBadgeCount: Int,
+    val learnerRank: LearnerRank,
     val nextRecommendedLetter: PhonicsLetter,
     val masteredCount: Int,
   ) : HomeUiState
 
   data class Error(val message: String) : HomeUiState
 }
+
+private data class LocalUiFilterState(
+  val selectedGroup: Int?,
+  val freeExplore: Boolean,
+  val modeOverride: LearningMode?,
+  val langOverride: LanguageMode?,
+)
 
 class HomeViewModel(
   private val repository: PhonicsProgressRepository,
@@ -49,41 +66,54 @@ class HomeViewModel(
   private val localModeOverride = MutableStateFlow<LearningMode?>(null)
   private val localLanguageOverride = MutableStateFlow<LanguageMode?>(null)
 
+  private var initializedBadgeTracking = false
+  private val seenUnlockedBadgeIds = mutableSetOf<String>()
+  private val _newlyUnlockedBadge = MutableStateFlow<DigitalBadge?>(null)
+  val newlyUnlockedBadge: StateFlow<DigitalBadge?> = _newlyUnlockedBadge.asStateFlow()
+
   init {
     viewModelScope.launch {
       repository.ensureProfileExists(defaultDisplayName)
     }
   }
 
+  private val localFilterFlow =
+    combine(
+      selectedGroupFilter,
+      freeExploreFlow,
+      localModeOverride,
+      localLanguageOverride,
+    ) { groupFilter, freeExplore, modeOverride, langOverride ->
+      LocalUiFilterState(
+        selectedGroup = groupFilter,
+        freeExplore = freeExplore,
+        modeOverride = modeOverride,
+        langOverride = langOverride,
+      )
+    }
+
   val uiState: StateFlow<HomeUiState> =
     combine(
         repository.observeProfile(currentUserId),
         repository.observeLetterProgress(currentUserId),
-        selectedGroupFilter,
-        freeExploreFlow,
-        localModeOverride,
-        localLanguageOverride,
-      ) { values ->
-        @Suppress("UNCHECKED_CAST")
-        val profile = (values[0] as LearnerProfile?) ?: LearnerProfile(
-          id = currentUserId,
-          userId = currentUserId,
-        )
-        @Suppress("UNCHECKED_CAST")
-        val progressMap = values[1] as Map<String, LetterProgress>
-        val groupFilter = values[2] as Int?
-        val freeExplore = values[3] as Boolean
-        val modeOverride = values[4] as LearningMode?
-        val langOverride = values[5] as LanguageMode?
+        repository.observeStageProgress(currentUserId),
+        localFilterFlow,
+      ) { remoteProfile, progressMap, stageMap, filters ->
+        val profile =
+          remoteProfile
+            ?: LearnerProfile(
+              id = currentUserId,
+              userId = currentUserId,
+            )
 
-        val activeMode = modeOverride ?: LearningMode.fromStorage(profile.preferredMode)
-        val activeLang = langOverride ?: LanguageMode.fromStorage(profile.preferredLanguage)
+        val activeMode = filters.modeOverride ?: LearningMode.fromStorage(profile.preferredMode)
+        val activeLang = filters.langOverride ?: LanguageMode.fromStorage(profile.preferredLanguage)
         val orderedLetters = PhonicsCurriculum.lettersForMode(activeMode)
         val visibleLetters =
-          if (groupFilter == null || activeMode == LearningMode.AZ) {
+          if (filters.selectedGroup == null || activeMode == LearningMode.AZ) {
             orderedLetters
           } else {
-            orderedLetters.filter { it.group.groupNumber == groupFilter }
+            orderedLetters.filter { it.group.groupNumber == filters.selectedGroup }
           }
 
         val satpinLetters = PhonicsCurriculum.lettersForMode(LearningMode.SATPIN)
@@ -92,14 +122,42 @@ class HomeViewModel(
             ?: satpinLetters.first()
         val masteredCount = progressMap.values.count { it.mastered }
 
+        val badgeProgressList =
+          BadgeCatalog.evaluate(
+            totalStars = profile.totalStars,
+            progressByLetter = progressMap,
+            stageProgress = stageMap,
+          )
+        val unlockedIds = badgeProgressList.filter { it.unlocked }.map { it.badge.id }.toSet()
+        if (remoteProfile != null) {
+          if (!initializedBadgeTracking) {
+            seenUnlockedBadgeIds.addAll(unlockedIds)
+            initializedBadgeTracking = true
+          } else {
+            val freshBadge =
+              badgeProgressList.firstOrNull { it.unlocked && it.badge.id !in seenUnlockedBadgeIds }
+            seenUnlockedBadgeIds.addAll(unlockedIds)
+            if (freshBadge != null) {
+              _newlyUnlockedBadge.value = freshBadge.badge
+            }
+          }
+        }
+
+        val unlockedCount = unlockedIds.size
+        val rank = BadgeCatalog.rankFor(unlockedCount)
+
         HomeUiState.Success(
           profile = profile,
           learningMode = activeMode,
           languageMode = activeLang,
-          selectedGroup = groupFilter,
-          freeExplore = freeExplore,
+          selectedGroup = filters.selectedGroup,
+          freeExplore = filters.freeExplore,
           letters = visibleLetters,
           progressByLetter = progressMap,
+          stageProgressById = stageMap,
+          badgeProgress = badgeProgressList,
+          unlockedBadgeCount = unlockedCount,
+          learnerRank = rank,
           nextRecommendedLetter = nextLetter,
           masteredCount = masteredCount,
         ) as HomeUiState
@@ -119,6 +177,10 @@ class HomeViewModel(
         started = SharingStarted.WhileSubscribed(STOP_TIMEOUT_MILLIS),
         initialValue = HomeUiState.Loading,
       )
+
+  fun dismissUnlockedBadge() {
+    _newlyUnlockedBadge.value = null
+  }
 
   fun setLearningMode(mode: LearningMode) {
     localModeOverride.value = mode
@@ -175,6 +237,15 @@ class HomeViewModel(
         quizScore = quizScore,
         mastered = mastered,
       )
+    }
+  }
+
+  fun recordStageReward(
+    stageId: String,
+    starsEarnedDelta: Int,
+  ) {
+    viewModelScope.launch {
+      repository.recordStageReward(stageId = stageId, starsEarnedDelta = starsEarnedDelta)
     }
   }
 

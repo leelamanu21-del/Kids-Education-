@@ -6,6 +6,7 @@ import android.media.AudioFormat
 import android.media.AudioTrack
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.Voice
 import android.util.Log
@@ -18,16 +19,22 @@ import kotlin.math.exp
 import kotlin.math.sin
 
 /**
- * Child-friendly Indian-accent audio engine combining Google Speech Services high-quality
- * Indian English (en-IN) & Hindi (hi-IN) neural/local voices with warm musical chimes.
+ * Natural Indian-teacher phonics audio engine.
+ * Prioritizes Google Speech Services HD neural (-network) Indian English (en-IN) & Hindi (hi-IN)
+ * voices with slow-motion YouTube-teacher pacing, warm pitch, and segmented breathing pauses.
  */
 class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
 
-  private data class PendingSpeech(
+  private data class SpeechSegment(
     val text: String,
-    val locale: Locale,
     val speechRate: Float,
-    val fallbackText: String? = null,
+    val pauseAfterMs: Long = 0L,
+  )
+
+  private data class PendingSpeech(
+    val segments: List<SpeechSegment>,
+    val locale: Locale,
+    val fallbackSegments: List<SpeechSegment>? = null,
     val fallbackLocale: Locale = Locale.forLanguageTag("en-IN"),
   )
 
@@ -40,6 +47,20 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
 
   private val indianEnglishLocale = Locale.forLanguageTag("en-IN")
   private val hindiLocale = Locale.forLanguageTag("hi-IN")
+
+  private val speechAudioAttributes: AudioAttributes by lazy {
+    AudioAttributes.Builder()
+      .setUsage(AudioAttributes.USAGE_MEDIA)
+      .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+      .build()
+  }
+
+  private val ttsParams: Bundle by lazy {
+    Bundle().apply {
+      putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, 1.0f)
+      putString(TextToSpeech.Engine.KEY_FEATURE_NETWORK_RETRIES_COUNT, "2")
+    }
+  }
 
   override fun onInit(status: Int) {
     if (status == TextToSpeech.SUCCESS) {
@@ -60,15 +81,15 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
       }
 
       isReady = true
-      tts?.setPitch(DEFAULT_PITCH)
-      tts?.setSpeechRate(SENTENCE_SPEECH_RATE)
+      engine?.setAudioAttributes(speechAudioAttributes)
+      engine?.setPitch(DEFAULT_PITCH)
+      engine?.setSpeechRate(SENTENCE_SPEECH_RATE)
       pendingSpeech?.let { request ->
         pendingSpeech = null
-        speakInternal(
-          text = request.text,
+        speakSegmentsInternal(
+          segments = request.segments,
           preferredLocale = request.locale,
-          speechRate = request.speechRate,
-          fallbackText = request.fallbackText,
+          fallbackSegments = request.fallbackSegments,
           fallbackLocale = request.fallbackLocale,
         )
       }
@@ -84,82 +105,99 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
 
   fun speakLetterPhoneme(letter: PhonicsLetter, languageMode: LanguageMode) {
     val englishSound = spokenEnglishSound(letter)
-    val englishFallback =
-      "$englishSound, ${letter.letter} makes the sound $englishSound, as in ${letter.exampleWord}."
+    val englishSegments =
+      listOf(
+        SpeechSegment(text = "${letter.letter}.", speechRate = PHONEME_SPEECH_RATE, pauseAfterMs = 280L),
+        SpeechSegment(
+          text = "${letter.letter} says, $englishSound.",
+          speechRate = WORD_SPEECH_RATE,
+          pauseAfterMs = 260L,
+        ),
+        SpeechSegment(text = "as in, ${letter.exampleWord}.", speechRate = WORD_SPEECH_RATE),
+      )
 
     when (languageMode) {
       LanguageMode.HINGLISH -> {
-        val hindiScript = hinglishVoiceScript(letter)
-        speakInternal(
-          text = hindiScript,
+        val hindiSegments = buildHinglishLetterSegments(letter)
+        speakSegmentsInternal(
+          segments = hindiSegments,
           preferredLocale = hindiLocale,
-          speechRate = SENTENCE_SPEECH_RATE,
-          fallbackText = englishFallback,
+          fallbackSegments = englishSegments,
           fallbackLocale = indianEnglishLocale,
         )
       }
       LanguageMode.ENGLISH -> {
-        speakInternal(
-          text = englishFallback,
+        speakSegmentsInternal(
+          segments = englishSegments,
           preferredLocale = indianEnglishLocale,
-          speechRate = SENTENCE_SPEECH_RATE,
         )
       }
     }
   }
 
-  fun speakPhonemeOnly(letter: PhonicsLetter) {
-    val sound = spokenEnglishSound(letter)
-    speakInternal(
-      text = "$sound.",
-      preferredLocale = indianEnglishLocale,
-      speechRate = WORD_SPEECH_RATE,
-    )
+  fun speakPhonemeOnly(letter: PhonicsLetter, languageMode: LanguageMode = LanguageMode.ENGLISH) {
+    val englishSound = spokenEnglishSound(letter)
+    if (languageMode == LanguageMode.HINGLISH) {
+      val hindiSound = hinglishPureSound(letter)
+      speakSegmentsInternal(
+        segments = listOf(SpeechSegment(text = "$hindiSound.", speechRate = PHONEME_SPEECH_RATE)),
+        preferredLocale = hindiLocale,
+        fallbackSegments = listOf(SpeechSegment(text = "$englishSound.", speechRate = PHONEME_SPEECH_RATE)),
+        fallbackLocale = indianEnglishLocale,
+      )
+    } else {
+      speakSegmentsInternal(
+        segments = listOf(SpeechSegment(text = "$englishSound.", speechRate = PHONEME_SPEECH_RATE)),
+        preferredLocale = indianEnglishLocale,
+      )
+    }
   }
 
   fun speakWord(word: String, languageMode: LanguageMode) {
     val cleanWord = formatWordForNaturalSpeech(word)
-    speakInternal(
-      text = "$cleanWord.",
+    speakSegmentsInternal(
+      segments = listOf(SpeechSegment(text = "$cleanWord.", speechRate = WORD_SPEECH_RATE)),
       preferredLocale = indianEnglishLocale,
-      speechRate = WORD_SPEECH_RATE,
     )
   }
 
   fun speakHindiCue(cue: String) {
-    speakInternal(
-      text = cue,
+    val segments = splitIntoPausedSegments(cue, SENTENCE_SPEECH_RATE)
+    speakSegmentsInternal(
+      segments = segments,
       preferredLocale = hindiLocale,
-      speechRate = SENTENCE_SPEECH_RATE,
-      fallbackText = cue,
+      fallbackSegments = segments,
       fallbackLocale = indianEnglishLocale,
     )
   }
 
   fun speakText(text: String, locale: Locale = indianEnglishLocale) {
-    speakInternal(
-      text = text,
+    val segments = splitIntoPausedSegments(text, SENTENCE_SPEECH_RATE)
+    speakSegmentsInternal(
+      segments = segments,
       preferredLocale = locale,
-      speechRate = SENTENCE_SPEECH_RATE,
-      fallbackText = text,
+      fallbackSegments = segments,
       fallbackLocale = indianEnglishLocale,
     )
   }
 
-  fun speakSoundToken(spokenSyllable: String, hindiSound: String? = null, languageMode: LanguageMode) {
-    if (languageMode == LanguageMode.HINGLISH && !hindiSound.isNullOrBlank()) {
-      speakInternal(
-        text = "$hindiSound.",
+  fun speakSoundToken(
+    spokenSyllable: String,
+    hindiSound: String? = null,
+    languageMode: LanguageMode,
+  ) {
+    val mappedHindi = hindiSound?.takeIf { it.isNotBlank() } ?: blendHindiCue(spokenSyllable)
+    if (languageMode == LanguageMode.HINGLISH && !mappedHindi.isNullOrBlank()) {
+      speakSegmentsInternal(
+        segments = listOf(SpeechSegment(text = "$mappedHindi.", speechRate = PHONEME_SPEECH_RATE)),
         preferredLocale = hindiLocale,
-        speechRate = WORD_SPEECH_RATE,
-        fallbackText = "$spokenSyllable.",
+        fallbackSegments = listOf(SpeechSegment(text = "$spokenSyllable.", speechRate = PHONEME_SPEECH_RATE)),
         fallbackLocale = indianEnglishLocale,
       )
     } else {
-      speakInternal(
-        text = "$spokenSyllable.",
+      speakSegmentsInternal(
+        segments = listOf(SpeechSegment(text = "$spokenSyllable.", speechRate = PHONEME_SPEECH_RATE)),
         preferredLocale = indianEnglishLocale,
-        speechRate = WORD_SPEECH_RATE,
       )
     }
   }
@@ -169,44 +207,61 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
     englishScript: String,
     languageMode: LanguageMode,
   ) {
+    val englishSegments = splitIntoPausedSegments(englishScript, SENTENCE_SPEECH_RATE)
     if (languageMode == LanguageMode.HINGLISH) {
-      speakInternal(
-        text = hindiDevanagariScript,
+      val hindiSegments = splitIntoPausedSegments(hindiDevanagariScript, SENTENCE_SPEECH_RATE)
+      speakSegmentsInternal(
+        segments = hindiSegments,
         preferredLocale = hindiLocale,
-        speechRate = SENTENCE_SPEECH_RATE,
-        fallbackText = englishScript,
+        fallbackSegments = englishSegments,
         fallbackLocale = indianEnglishLocale,
       )
     } else {
-      speakInternal(
-        text = englishScript,
+      speakSegmentsInternal(
+        segments = englishSegments,
         preferredLocale = indianEnglishLocale,
-        speechRate = SENTENCE_SPEECH_RATE,
       )
     }
   }
 
-  private fun speakInternal(
-    text: String,
+  private fun splitIntoPausedSegments(text: String, rate: Float): List<SpeechSegment> {
+    val normalized = text.trim()
+    if (normalized.isEmpty()) return emptyList()
+    val parts =
+      normalized
+        .split(Regex("(?<=[.!?।])\\s+"))
+        .map { it.trim() }
+        .filter { it.isNotEmpty() }
+    if (parts.isEmpty()) return listOf(SpeechSegment(normalized, rate))
+    return parts.mapIndexed { idx, part ->
+      SpeechSegment(
+        text = part,
+        speechRate = rate,
+        pauseAfterMs = if (idx < parts.lastIndex) 280L else 0L,
+      )
+    }
+  }
+
+  private fun speakSegmentsInternal(
+    segments: List<SpeechSegment>,
     preferredLocale: Locale,
-    speechRate: Float,
-    fallbackText: String? = null,
+    fallbackSegments: List<SpeechSegment>? = null,
     fallbackLocale: Locale = indianEnglishLocale,
   ) {
     val engine = tts ?: return
+    if (segments.isEmpty()) return
     if (!isReady) {
       pendingSpeech =
         PendingSpeech(
-          text = text,
+          segments = segments,
           locale = preferredLocale,
-          speechRate = speechRate,
-          fallbackText = fallbackText,
+          fallbackSegments = fallbackSegments,
           fallbackLocale = fallbackLocale,
         )
       return
     }
 
-    var textToSpeak = text
+    var activeSegments = segments
     var targetLocale = preferredLocale
 
     var selectedVoice = selectBestIndianVoice(engine, targetLocale)
@@ -222,7 +277,7 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
         langReady == TextToSpeech.LANG_NOT_SUPPORTED
     ) {
       targetLocale = fallbackLocale
-      textToSpeak = fallbackText ?: text
+      activeSegments = fallbackSegments ?: segments
       selectedVoice = selectBestIndianVoice(engine, targetLocale)
       val fallbackResult =
         if (selectedVoice != null) {
@@ -238,9 +293,27 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
       }
     }
 
+    Log.d(
+      TAG,
+      "Speaking locale=$targetLocale voice=${selectedVoice?.name} netReq=${selectedVoice?.isNetworkConnectionRequired}",
+    )
+
+    engine.setAudioAttributes(speechAudioAttributes)
     engine.setPitch(DEFAULT_PITCH)
-    engine.setSpeechRate(speechRate)
-    engine.speak(textToSpeak, TextToSpeech.QUEUE_FLUSH, null, "phonics_${System.nanoTime()}")
+
+    activeSegments.forEachIndexed { idx, segment ->
+      val queueMode = if (idx == 0) TextToSpeech.QUEUE_FLUSH else TextToSpeech.QUEUE_ADD
+      engine.setSpeechRate(segment.speechRate)
+      val utteranceId = "phonics_${System.nanoTime()}_$idx"
+      engine.speak(segment.text, queueMode, ttsParams, utteranceId)
+      if (segment.pauseAfterMs > 0L) {
+        engine.playSilentUtterance(
+          segment.pauseAfterMs,
+          TextToSpeech.QUEUE_ADD,
+          "pause_${System.nanoTime()}_$idx",
+        )
+      }
+    }
   }
 
   private fun selectBestIndianVoice(engine: TextToSpeech, targetLocale: Locale): Voice? {
@@ -265,10 +338,19 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
         val name = voice.name.lowercase(Locale.ROOT)
         val voiceCountry = voice.locale.country.uppercase(Locale.ROOT)
         var score = 0
+
         if (voiceCountry == targetCountry) {
-          score += 2000
+          score += 3000
         } else if (targetLang == "en" && voiceCountry == "GB") {
-          score += 400
+          score += 350
+        }
+
+        // Strongly prefer studio-quality Neural (-network) voices when online instead of robotic -local TTS
+        val isNeuralNetworkVoice = voice.isNetworkConnectionRequired || "-network" in name
+        if (isOnline && isNeuralNetworkVoice) {
+          score += 1500
+        } else if (!isNeuralNetworkVoice && voice.quality >= Voice.QUALITY_HIGH) {
+          score += 120
         }
 
         score +=
@@ -280,12 +362,10 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
             else -> 0
           }
 
-        if ("-x-" in name) score += 250
-        if (name.endsWith("-language")) score -= 120
-        if (FEMALE_VOICE_HINTS.any { it in name }) score += 160
-        if (!voice.isNetworkConnectionRequired && voice.quality >= Voice.QUALITY_HIGH) {
-          score += 60
-        }
+        if ("-x-" in name) score += 280
+        if (name.endsWith("-language")) score -= 300
+        if (WARM_FEMALE_VOICE_HINTS.any { it in name }) score += 260
+        if (NATURAL_INDIAN_VOICE_HINTS.any { it in name }) score += 140
         score
       }
   }
@@ -315,79 +395,146 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
 
   private fun spokenEnglishSound(letter: PhonicsLetter): String =
     when (letter.letter.uppercase(Locale.ROOT)) {
-      "S" -> "suh"
-      "A" -> "aah"
+      "S" -> "sss"
+      "A" -> "aaah"
       "T" -> "tuh"
       "P" -> "puh"
-      "I" -> "ih"
-      "N" -> "nuh"
+      "I" -> "ihh"
+      "N" -> "nnn"
       "C" -> "kuh"
       "K" -> "kuh"
-      "E" -> "eh"
+      "E" -> "ehh"
       "H" -> "huh"
-      "R" -> "ruh"
-      "M" -> "muh"
+      "R" -> "rrr"
+      "M" -> "mmm"
       "D" -> "duh"
       "G" -> "guh"
-      "O" -> "aw"
-      "U" -> "uh"
-      "L" -> "luh"
-      "F" -> "fuh"
+      "O" -> "aww"
+      "U" -> "uhh"
+      "L" -> "lll"
+      "F" -> "fff"
       "B" -> "buh"
       "J" -> "juh"
-      "Z" -> "zuh"
+      "Z" -> "zzz"
       "W" -> "wuh"
-      "V" -> "vuh"
+      "V" -> "vvv"
       "Y" -> "yuh"
       "X" -> "eks"
       "Q" -> "kwuh"
       else -> letter.phonemeSpeech
     }
 
-  private fun hinglishVoiceScript(letter: PhonicsLetter): String =
+  private fun hinglishPureSound(letter: PhonicsLetter): String =
     when (letter.letter.uppercase(Locale.ROOT)) {
-      "S" -> "स, एस की आवाज़ है स, जैसे सूरज और Sun."
-      "A" -> "ऐ, ए की आवाज़ है ऐ, जैसे चींटी और Ant."
-      "T" -> "ट, टी की आवाज़ है ट, जैसे नल, Tap और Tiger."
-      "P" -> "प, पी की आवाज़ है प, जैसे पतंग और Pan."
-      "I" -> "इ, आई की आवाज़ है इ, जैसे Igloo और Ink."
-      "N" -> "न, एन की आवाज़ है न, जैसे जाल और Net."
-      "C" -> "क, सी की आवाज़ है क, जैसे प्यारी बिल्ली और Cat."
-      "K" -> "क, के की आवाज़ है क, जैसे पतंग और Kite."
-      "E" -> "ए, ई की आवाज़ है ए, जैसे अंडा, Egg और Elephant."
-      "H" -> "ह, एच की आवाज़ है ह, जैसे टोपी और Hat."
-      "R" -> "र, आर की आवाज़ है र, जैसे चूहा और Rat."
-      "M" -> "म, एम की आवाज़ है म, जैसे मीठा आम और Mango."
-      "D" -> "ड, डी की आवाज़ है ड, जैसे ढोल और Drum."
-      "G" -> "ग, जी की आवाज़ है ग, जैसे बकरी और Goat."
-      "O" -> "ऑ, ओ की आवाज़ है ऑ, जैसे संतरा और Orange."
-      "U" -> "अ, यू की आवाज़ है अ, जैसे छाता और Umbrella."
-      "L" -> "ल, एल की आवाज़ है ल, जैसे Lollipop और Lion."
-      "F" -> "फ़, एफ़ की आवाज़ है फ़, जैसे मछली और Fish."
-      "B" -> "ब, बी की आवाज़ है ब, जैसे गेंद और Ball."
-      "J" -> "ज, जे की आवाज़ है ज, जैसे जग और Jam."
-      "Z" -> "ज़, ज़ेड की आवाज़ है ज़, जैसे ज़ेबरा और Zoo."
-      "W" -> "व, डब्ल्यू की आवाज़ है व, जैसे Web और Whale."
-      "V" -> "व, वी की आवाज़ है व, जैसे Van और Violin."
-      "Y" -> "य, वाई की आवाज़ है य, जैसे Yellow और Yo-Yo."
-      "X" -> "क्स, एक्स की आवाज़ है क्स, जैसे Box और Fox."
-      "Q" -> "क्व, क्यू की आवाज़ है क्व, जैसे रानी और Queen."
-      else -> letter.hinglishAudioScript
+      "S" -> "स"
+      "A" -> "ऐ"
+      "T" -> "ट"
+      "P" -> "प"
+      "I" -> "इ"
+      "N" -> "न"
+      "C" -> "क"
+      "K" -> "क"
+      "E" -> "ए"
+      "H" -> "ह"
+      "R" -> "र"
+      "M" -> "म"
+      "D" -> "ड"
+      "G" -> "ग"
+      "O" -> "ऑ"
+      "U" -> "अ"
+      "L" -> "ल"
+      "F" -> "फ़"
+      "B" -> "ब"
+      "J" -> "ज"
+      "Z" -> "ज़"
+      "W" -> "व"
+      "V" -> "व"
+      "Y" -> "य"
+      "X" -> "क्स"
+      "Q" -> "क्व"
+      else -> letter.phonemeSpeech
+    }
+
+  private fun blendHindiCue(spokenSyllable: String): String? =
+    when (spokenSyllable.lowercase(Locale.ROOT)) {
+      "bluh" -> "ब्ल"
+      "gruh" -> "ग्र"
+      "stuh" -> "स्ट"
+      "fruh" -> "फ्र"
+      "kluh" -> "क्ल"
+      "truh" -> "ट्र"
+      "bruh" -> "ब्र"
+      "kruh" -> "क्र"
+      "druh" -> "ड्र"
+      "fluh" -> "फ़्ल"
+      "pluh" -> "प्ल"
+      "spuh" -> "स्प"
+      else -> null
+    }
+
+  private fun buildHinglishLetterSegments(letter: PhonicsLetter): List<SpeechSegment> {
+    val sound = hinglishPureSound(letter)
+    val spokenLetterName = hindiSpokenLetterName(letter.letter)
+    val hindiWord = letter.hindiScriptWord
+    val englishWord = letter.exampleWord
+    return listOf(
+      SpeechSegment(text = "$sound.", speechRate = PHONEME_SPEECH_RATE, pauseAfterMs = 280L),
+      SpeechSegment(
+        text = "$spokenLetterName की आवाज़ होती है, $sound.",
+        speechRate = SENTENCE_SPEECH_RATE,
+        pauseAfterMs = 240L,
+      ),
+      SpeechSegment(
+        text = "जैसे, $hindiWord, और $englishWord.",
+        speechRate = WORD_SPEECH_RATE,
+      ),
+    )
+  }
+
+  private fun hindiSpokenLetterName(letter: String): String =
+    when (letter.uppercase(Locale.ROOT)) {
+      "A" -> "ए"
+      "B" -> "बी"
+      "C" -> "सी"
+      "D" -> "डी"
+      "E" -> "ई"
+      "F" -> "एफ़"
+      "G" -> "जी"
+      "H" -> "एच"
+      "I" -> "आई"
+      "J" -> "जे"
+      "K" -> "के"
+      "L" -> "एल"
+      "M" -> "एम"
+      "N" -> "एन"
+      "O" -> "ओ"
+      "P" -> "पी"
+      "Q" -> "क्यू"
+      "R" -> "आर"
+      "S" -> "एस"
+      "T" -> "टी"
+      "U" -> "यू"
+      "V" -> "वी"
+      "W" -> "डब्ल्यू"
+      "X" -> "एक्स"
+      "Y" -> "वाई"
+      "Z" -> "ज़ेड"
+      else -> letter
     }
 
   fun playPopSound() {
-    playToneSequence(listOf(523.25 to 65, 659.25 to 85), volume = 0.24f)
+    playToneSequence(listOf(523.25 to 65, 659.25 to 85), volume = 0.22f)
   }
 
   fun playCelebrationChime() {
     playToneSequence(
       listOf(523.25 to 90, 659.25 to 90, 783.99 to 105, 1046.50 to 200),
-      volume = 0.28f,
+      volume = 0.26f,
     )
   }
 
   fun playGentleTryAgain() {
-    playToneSequence(listOf(330.0 to 100, 293.66 to 140), volume = 0.18f)
+    playToneSequence(listOf(330.0 to 100, 293.66 to 140), volume = 0.16f)
   }
 
   private fun playToneSequence(notes: List<Pair<Double, Int>>, volume: Float) {
@@ -459,10 +606,13 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
   private companion object {
     const val TAG = "PhonicsAudioPlayer"
     const val GOOGLE_TTS_PACKAGE = "com.google.android.tts"
-    const val DEFAULT_PITCH = 1.02f
-    const val SENTENCE_SPEECH_RATE = 0.92f
-    const val WORD_SPEECH_RATE = 0.88f
-    val FEMALE_VOICE_HINTS =
-      listOf("ena", "enc", "ene", "ahp", "hia", "hic", "hie", "female", "woman")
+    const val DEFAULT_PITCH = 0.96f
+    const val SENTENCE_SPEECH_RATE = 0.74f
+    const val WORD_SPEECH_RATE = 0.68f
+    const val PHONEME_SPEECH_RATE = 0.62f
+    val WARM_FEMALE_VOICE_HINTS =
+      listOf("ena", "enc", "ene", "hia", "hic", "hie", "female", "woman")
+    val NATURAL_INDIAN_VOICE_HINTS =
+      listOf("end", "ahp", "hid", "en-in", "hi-in")
   }
 }

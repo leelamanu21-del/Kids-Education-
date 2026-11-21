@@ -72,6 +72,31 @@ service cloud.firestore {
              data.updatedAt <= request.time;
     }
 
+    function isValidStageProgress(data, userId, stageId) {
+      return data.userId is string &&
+             data.userId == userId &&
+             data.userId.size() <= 128 &&
+             data.stageId is string &&
+             data.stageId == stageId &&
+             data.stageId in [
+               'level2_blender',
+               'level2_sight_words',
+               'level3_ukg',
+               'level4_class1',
+               'level5_class2'
+             ] &&
+             data.starsEarned is int &&
+             data.starsEarned >= 0 &&
+             data.starsEarned <= 5000 &&
+             data.completionsCount is int &&
+             data.completionsCount >= 0 &&
+             data.completionsCount <= 10000 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
     match /users/{userId} {
       allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
       allow list: if false;
@@ -141,6 +166,37 @@ service cloud.firestore {
                          ]);
 
         allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(letterId);
+      }
+
+      match /stage_progress/{stageId} {
+        allow get: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(stageId);
+        allow list: if isSignedIn() && request.auth.uid == userId && isValidId(userId);
+
+        allow create: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(stageId) &&
+                         request.auth.uid == userId &&
+                         incoming().keys().hasAll([
+                           'userId', 'stageId', 'starsEarned', 'completionsCount', 'createdAt', 'updatedAt'
+                         ]) &&
+                         incoming().keys().hasOnly([
+                           'userId', 'stageId', 'starsEarned', 'completionsCount', 'createdAt', 'updatedAt'
+                         ]) &&
+                         isValidStageProgress(incoming(), userId, stageId);
+
+        allow update: if isSignedIn() &&
+                         isValidId(userId) &&
+                         isValidId(stageId) &&
+                         request.auth.uid == userId &&
+                         incoming().userId == existing().userId &&
+                         incoming().stageId == existing().stageId &&
+                         incoming().createdAt == existing().createdAt &&
+                         isValidStageProgress(incoming(), userId, stageId) &&
+                         incoming().diff(existing()).affectedKeys().hasOnly([
+                           'starsEarned', 'completionsCount', 'updatedAt'
+                         ]);
+
+        allow delete: if isSignedIn() && request.auth.uid == userId && isValidId(userId) && isValidId(stageId);
       }
     }
   }

@@ -28,9 +28,11 @@ import androidx.navigation.navArgument
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.core.timer.SessionTimerUiState
 import com.example.data.repository.PhonicsProgressRepository
+import com.example.domain.curriculum.BadgeCatalog
 import com.example.domain.curriculum.PhonicsCurriculum
 import com.example.domain.model.LanguageMode
 import com.example.domain.model.LearnerProfile
+import com.example.domain.model.RewardStageIds
 import com.example.feature.auth.AuthScreen
 import com.example.feature.auth.signOut
 import com.example.feature.blender.WordBlenderScreen
@@ -40,6 +42,8 @@ import com.example.feature.home.HomeViewModel
 import com.example.feature.lesson.LetterLessonScreen
 import com.example.feature.parent.ParentMathGateDialog
 import com.example.feature.parent.ParentZoneScreen
+import com.example.feature.rewards.BadgeUnlockCelebrationDialog
+import com.example.feature.rewards.BadgesScreen
 import com.example.feature.stages.Class1FluencyScreen
 import com.example.feature.stages.Class2GrammarStoryScreen
 import com.example.feature.stages.SightWordsScreen
@@ -64,6 +68,7 @@ object PhonicsRoutes {
   const val UKG_STAGE = "ukg_stage"
   const val CLASS1_STAGE = "class1_stage"
   const val CLASS2_STAGE = "class2_stage"
+  const val REWARDS = "rewards"
   const val PARENT = "parent"
 
   fun lessonRoute(letter: String): String = "lesson/${letter.uppercase()}"
@@ -143,6 +148,7 @@ private fun AuthenticatedPhonicsFlow(
     )
 
   val homeState by homeViewModel.uiState.collectAsStateWithLifecycle()
+  val newlyUnlockedBadge by homeViewModel.newlyUnlockedBadge.collectAsStateWithLifecycle()
   val navController = rememberNavController()
   val successState = homeState as? HomeUiState.Success
   val currentLanguageMode = successState?.languageMode ?: LanguageMode.HINGLISH
@@ -215,6 +221,7 @@ private fun AuthenticatedPhonicsFlow(
         onOpenUkgStage = { navController.navigate(PhonicsRoutes.UKG_STAGE) },
         onOpenClass1Stage = { navController.navigate(PhonicsRoutes.CLASS1_STAGE) },
         onOpenClass2Stage = { navController.navigate(PhonicsRoutes.CLASS2_STAGE) },
+        onOpenRewards = { navController.navigate(PhonicsRoutes.REWARDS) },
         onOpenParentZone = { showParentMathGate = true },
         onSignOut = {
           audioPlayer.stop()
@@ -256,6 +263,9 @@ private fun AuthenticatedPhonicsFlow(
         onWordBlended = {
           timerState = timerState.copy(wordsBlendedToday = timerState.wordsBlendedToday + 1)
         },
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_2_BLENDER, stars)
+        },
         onBack = {
           audioPlayer.stop()
           navController.popBackStack()
@@ -267,6 +277,9 @@ private fun AuthenticatedPhonicsFlow(
       SightWordsScreen(
         languageMode = currentLanguageMode,
         audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_2_SIGHT_WORDS, stars)
+        },
         onBack = {
           audioPlayer.stop()
           navController.popBackStack()
@@ -278,6 +291,9 @@ private fun AuthenticatedPhonicsFlow(
       UkgStageScreen(
         languageMode = currentLanguageMode,
         audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_3_UKG, stars)
+        },
         onBack = {
           audioPlayer.stop()
           navController.popBackStack()
@@ -289,6 +305,9 @@ private fun AuthenticatedPhonicsFlow(
       Class1FluencyScreen(
         languageMode = currentLanguageMode,
         audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_4_CLASS1, stars)
+        },
         onBack = {
           audioPlayer.stop()
           navController.popBackStack()
@@ -298,6 +317,33 @@ private fun AuthenticatedPhonicsFlow(
 
     composable(PhonicsRoutes.CLASS2_STAGE) {
       Class2GrammarStoryScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_5_CLASS2, stars)
+        },
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.REWARDS) {
+      val fallbackBadges =
+        remember(successState?.profile?.totalStars, successState?.progressByLetter, successState?.stageProgressById) {
+          successState?.badgeProgress
+            ?: BadgeCatalog.evaluate(
+              totalStars = successState?.profile?.totalStars ?: 0L,
+              progressByLetter = successState?.progressByLetter.orEmpty(),
+              stageProgress = successState?.stageProgressById.orEmpty(),
+            )
+        }
+      BadgesScreen(
+        childName = successState?.profile?.childName ?: defaultChildName,
+        totalStars = successState?.profile?.totalStars ?: 0L,
+        learnerRank = successState?.learnerRank ?: BadgeCatalog.rankFor(0),
+        badgeProgress = fallbackBadges,
         languageMode = currentLanguageMode,
         audioPlayer = audioPlayer,
         onBack = {
@@ -314,6 +360,8 @@ private fun AuthenticatedPhonicsFlow(
             ?: LearnerProfile(id = currentUserId, userId = currentUserId, childName = defaultChildName),
         progressByLetter = successState?.progressByLetter.orEmpty(),
         timerState = timerState,
+        unlockedBadgesCount = successState?.unlockedBadgeCount ?: 0,
+        totalBadgesCount = BadgeCatalog.badges.size,
         onSelectTimerPreset = { preset ->
           timerState = timerState.copy(preset = preset)
         },
@@ -324,6 +372,21 @@ private fun AuthenticatedPhonicsFlow(
         onBack = { navController.popBackStack() },
       )
     }
+  }
+
+  newlyUnlockedBadge?.let { unlockedBadge ->
+    BadgeUnlockCelebrationDialog(
+      badge = unlockedBadge,
+      languageMode = currentLanguageMode,
+      audioPlayer = audioPlayer,
+      onViewAllBadges = {
+        homeViewModel.dismissUnlockedBadge()
+        navController.navigate(PhonicsRoutes.REWARDS) {
+          launchSingleTop = true
+        }
+      },
+      onDismiss = homeViewModel::dismissUnlockedBadge,
+    )
   }
 
   if (showParentMathGate) {

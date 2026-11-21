@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -22,12 +23,15 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
 import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material.icons.rounded.Visibility
@@ -35,6 +39,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -68,20 +73,28 @@ import com.example.ui.theme.MintGreen
 import com.example.ui.theme.PlumPurple
 import com.example.ui.theme.SkyTeal
 import com.example.ui.theme.SunshineAmber
+import kotlin.random.Random
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SightWordsScreen(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit = {},
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   BackHandler(onBack = onBack)
 
   val words = EarlyCurriculumCatalog.sightWords
+  val setLabels = listOf("Set 1 (1-8)", "Set 2 (9-16)", "Set 3 (17-24)")
+  var selectedSet by remember { mutableIntStateOf(0) }
   var selectedIndex by remember { mutableIntStateOf(0) }
   val current = words[selectedIndex]
+
+  val setStart = selectedSet * 8
+  val setEnd = minOf(setStart + 8, words.size)
+  val currentSetWords = words.subList(setStart, setEnd)
 
   var spotTargetIndex by remember(selectedIndex) { mutableIntStateOf(selectedIndex) }
   var quizPicked by remember(selectedIndex) { mutableStateOf<String?>(null) }
@@ -90,7 +103,11 @@ fun SightWordsScreen(
   val quizChoices =
     remember(spotTargetIndex) {
       val target = words[spotTargetIndex]
-      val distractors = words.filter { it.word != target.word }.take(2)
+      val distractors =
+        words
+          .filter { it.word != target.word }
+          .shuffled(Random(spotTargetIndex + 17))
+          .take(2)
       (listOf(target) + distractors).sortedBy { it.word }
     }
 
@@ -115,7 +132,7 @@ fun SightWordsScreen(
             .verticalScroll(rememberScrollState())
             .windowInsetsPadding(WindowInsets.navigationBars)
             .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
+        verticalArrangement = Arrangement.spacedBy(14.dp),
       ) {
         Row(
           modifier = Modifier.fillMaxWidth(),
@@ -153,26 +170,56 @@ fun SightWordsScreen(
               )
               Spacer(modifier = Modifier.width(6.dp))
               Text(
-                text = "LKG · Tricky Sight Words",
+                text = "LKG · 24 Sight Words",
                 style = MaterialTheme.typography.labelLarge,
                 color = InkNavy,
               )
             }
           }
 
-          Spacer(modifier = Modifier.size(48.dp))
+          Surface(
+            color = SkyTeal.copy(alpha = 0.14f),
+            shape = RoundedCornerShape(50),
+          ) {
+            Text(
+              text = "${selectedIndex + 1} / ${words.size}",
+              style = MaterialTheme.typography.labelLarge,
+              fontWeight = FontWeight.Bold,
+              color = SkyTeal,
+              modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+            )
+          }
         }
 
-        // Sight Word Selector Strip
+        // 3 Structured Sets Filter Row
+        LazyRow(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          contentPadding = PaddingValues(vertical = 2.dp),
+        ) {
+          itemsIndexed(setLabels) { setIdx, label ->
+            FilterChip(
+              selected = selectedSet == setIdx,
+              onClick = {
+                selectedSet = setIdx
+                selectedIndex = setIdx * 8
+              },
+              label = { Text(label, fontWeight = FontWeight.Bold) },
+              modifier = Modifier.minimumInteractiveComponentSize().testTag("sight_set_$setIdx"),
+            )
+          }
+        }
+
+        // Active Set Sight Word Selector Strip (8 words per set)
         FlowRow(
           horizontalArrangement = Arrangement.spacedBy(8.dp),
           verticalArrangement = Arrangement.spacedBy(8.dp),
           modifier = Modifier.fillMaxWidth(),
         ) {
-          words.forEachIndexed { idx, item ->
-            val selected = idx == selectedIndex
+          currentSetWords.forEachIndexed { localIdx, item ->
+            val globalIdx = setStart + localIdx
+            val selected = globalIdx == selectedIndex
             Surface(
-              onClick = { selectedIndex = idx },
+              onClick = { selectedIndex = globalIdx },
               color = if (selected) CoralPrimary else MaterialTheme.colorScheme.surface,
               shape = RoundedCornerShape(16.dp),
               modifier =
@@ -331,6 +378,7 @@ fun SightWordsScreen(
                       quizPicked = option.word
                       if (isCorrect) {
                         quizSolved = true
+                        onAwardStars(1)
                         audioPlayer.playCelebrationChime()
                         audioPlayer.speakWord(option.word, languageMode)
                       } else {
@@ -362,13 +410,47 @@ fun SightWordsScreen(
                 Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MintGreen)
                 Text(
                   text =
-                    if (languageMode == LanguageMode.HINGLISH) "Shabaash! Sahi pehchana!"
-                    else "Awesome! You spotted it!",
+                    if (languageMode == LanguageMode.HINGLISH) "Shabaash! Sahi pehchana! (+1 ⭐)"
+                    else "Awesome! You spotted it! (+1 ⭐)",
                   style = MaterialTheme.typography.titleSmall,
                   color = InkNavy,
                 )
               }
             }
+          }
+        }
+
+        // Prev / Next Word Course Navigation
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+          OutlinedButton(
+            onClick = {
+              val prev = (selectedIndex - 1 + words.size) % words.size
+              selectedIndex = prev
+              selectedSet = prev / 8
+            },
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.weight(1f).height(50.dp),
+          ) {
+            Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+            Spacer(modifier = Modifier.width(6.dp))
+            Text("Prev Word", fontWeight = FontWeight.Bold)
+          }
+          Button(
+            onClick = {
+              val next = (selectedIndex + 1) % words.size
+              selectedIndex = next
+              selectedSet = next / 8
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = CoralPrimary),
+            shape = RoundedCornerShape(16.dp),
+            modifier = Modifier.weight(1f).height(50.dp).testTag("next_sight_word_button"),
+          ) {
+            Text("Next Word", fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.width(6.dp))
+            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
           }
         }
       }

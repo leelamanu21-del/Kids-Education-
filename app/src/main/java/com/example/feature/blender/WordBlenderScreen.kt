@@ -122,42 +122,48 @@ fun WordBlenderScreen(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
   onWordBlended: () -> Unit,
+  onAwardStars: (Int) -> Unit = {},
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
   BackHandler(onBack = onBack)
 
-  val words = PhonicsCurriculum.cvcWords
-  var selectedIndex by remember { mutableIntStateOf(0) }
-  val currentWord = words[selectedIndex]
+  val allWords = PhonicsCurriculum.cvcWords
+  var selectedGroupFilter by remember { mutableStateOf<Int?>(null) }
+  val words =
+    remember(selectedGroupFilter) {
+      if (selectedGroupFilter == null) allWords else allWords.filter { it.groupNumber == selectedGroupFilter }
+    }
+  var selectedIndex by remember(selectedGroupFilter) { mutableIntStateOf(0) }
+  val currentWord = words[selectedIndex.coerceIn(0, words.lastIndex)]
   val scope = rememberCoroutineScope()
 
   // Slots hold the placed DraggableTile ID (or null if empty)
-  val slots = remember(selectedIndex) { mutableStateListOf<DraggableTile?>(null, null, null) }
-  var highlightedPhonemeIdx by remember(selectedIndex) { mutableIntStateOf(-1) }
-  var activeTipLetter by remember(selectedIndex) {
+  val slots = remember(currentWord.word) { mutableStateListOf<DraggableTile?>(null, null, null) }
+  var highlightedPhonemeIdx by remember(currentWord.word) { mutableIntStateOf(-1) }
+  var activeTipLetter by remember(currentWord.word) {
     mutableStateOf(PhonicsCurriculum.findByLetter(currentWord.phonemes.first()))
   }
-  var roundSuccess by remember(selectedIndex) { mutableStateOf(false) }
-  var roundError by remember(selectedIndex) { mutableStateOf(false) }
+  var roundSuccess by remember(currentWord.word) { mutableStateOf(false) }
+  var roundError by remember(currentWord.word) { mutableStateOf(false) }
   var scoreCount by remember { mutableIntStateOf(0) }
 
   // Build scrambled tile tray (3 target letters + 2 distractors)
   val trayTiles =
-    remember(selectedIndex) {
+    remember(currentWord.word) {
       val distractors =
         listOf("M", "P", "S", "R", "B", "L", "T")
           .filter { it !in currentWord.phonemes }
           .take(2)
-      val allLetters = (currentWord.phonemes + distractors).shuffled(Random(selectedIndex + 42))
+      val allLetters = (currentWord.phonemes + distractors).shuffled(Random(currentWord.word.hashCode() + 42))
       allLetters.mapIndexed { idx, ch -> DraggableTile(id = idx, letter = ch) }
     }
 
-  val slotBounds = remember(selectedIndex) { mutableStateMapOf<Int, Rect>() }
+  val slotBounds = remember(currentWord.word) { mutableStateMapOf<Int, Rect>() }
   val shakeOffset = remember { Animatable(0f) }
   val confettiProgress = remember { Animatable(0f) }
   val confettiParticles =
-    remember(selectedIndex) {
+    remember(currentWord.word) {
       val colors = listOf(CoralPrimary, SunshineAmber, MintGreen, SkyTeal, PlumPurple, TangerineOrange)
       List(28) { i ->
         ConfettiParticle(
@@ -178,6 +184,7 @@ fun WordBlenderScreen(
         roundError = false
         scoreCount++
         onWordBlended()
+        onAwardStars(2)
         scope.launch {
           confettiProgress.snapTo(0f)
           confettiProgress.animateTo(1f, tween(durationMillis = 900, easing = LinearEasing))
@@ -186,7 +193,7 @@ fun WordBlenderScreen(
           currentWord.phonemes.forEachIndexed { idx, ch ->
             highlightedPhonemeIdx = idx
             PhonicsCurriculum.findByLetter(ch)?.let { audioPlayer.speakPhonemeOnly(it) }
-            delay(500L)
+            delay(720L)
           }
           highlightedPhonemeIdx = -1
           audioPlayer.playCelebrationChime()
@@ -224,7 +231,7 @@ fun WordBlenderScreen(
     evaluateWordIfReady()
   }
 
-  LaunchedEffect(selectedIndex) {
+  LaunchedEffect(currentWord.word) {
     audioPlayer.speakWord(currentWord.word, languageMode)
   }
 
@@ -272,11 +279,20 @@ fun WordBlenderScreen(
             )
           }
 
-          Text(
-            text = "CVC Word Blending",
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onBackground,
-          )
+          Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+              text = "CVC Word Blending",
+              style = MaterialTheme.typography.headlineSmall,
+              fontWeight = FontWeight.Bold,
+              color = MaterialTheme.colorScheme.onBackground,
+            )
+            Text(
+              text = "Word ${selectedIndex + 1} of ${words.size}",
+              style = MaterialTheme.typography.labelMedium,
+              color = SkyTeal,
+              fontWeight = FontWeight.SemiBold,
+            )
+          }
 
           Surface(
             color = SunshineAmber.copy(alpha = 0.25f),
@@ -301,6 +317,28 @@ fun WordBlenderScreen(
                 fontWeight = FontWeight.Bold,
               )
             }
+          }
+        }
+
+        // Group Filter Chips (All 32, G1..G4)
+        val groupTabs = listOf<Pair<Int?, String>>(
+          null to "All (${allWords.size})",
+          1 to "G1 (10)",
+          2 to "G2 (8)",
+          3 to "G3 (8)",
+          4 to "G4 (6)",
+        )
+        LazyRow(
+          horizontalArrangement = Arrangement.spacedBy(8.dp),
+          contentPadding = PaddingValues(vertical = 2.dp),
+        ) {
+          itemsIndexed(groupTabs) { _, (groupId, label) ->
+            FilterChip(
+              selected = selectedGroupFilter == groupId,
+              onClick = { selectedGroupFilter = groupId },
+              label = { Text(label, fontWeight = FontWeight.Bold) },
+              modifier = Modifier.minimumInteractiveComponentSize(),
+            )
           }
         }
 
@@ -473,8 +511,8 @@ fun WordBlenderScreen(
               ) {
                 trayTiles.forEach { tile ->
                   val isUsed = tile.id in placedIds
-                  var dragOffset by remember(selectedIndex, tile.id) { mutableStateOf(Offset.Zero) }
-                  var tileOrigin by remember(selectedIndex, tile.id) { mutableStateOf(Offset.Zero) }
+                  var dragOffset by remember(currentWord.word, tile.id) { mutableStateOf(Offset.Zero) }
+                  var tileOrigin by remember(currentWord.word, tile.id) { mutableStateOf(Offset.Zero) }
                   val tileScale by
                     animateFloatAsState(
                       targetValue = if (isUsed) 0.88f else 1f,
@@ -495,7 +533,7 @@ fun WordBlenderScreen(
                           val b = coords.boundsInRoot()
                           tileOrigin = Offset(b.center.x, b.center.y)
                         }
-                        .pointerInput(selectedIndex, tile.id, isUsed, roundSuccess) {
+                        .pointerInput(currentWord.word, tile.id, isUsed, roundSuccess) {
                           if (!isUsed && !roundSuccess) {
                             detectDragGestures(
                               onDrag = { change, dragAmount ->
@@ -575,9 +613,9 @@ fun WordBlenderScreen(
                     Text(
                       text =
                         if (languageMode == LanguageMode.HINGLISH) {
-                          "Wah! ${currentWord.word} bilkul sahi banaya!"
+                          "Wah! ${currentWord.word} sahi banaya! (+2 ⭐)"
                         } else {
-                          "Awesome! You blended ${currentWord.word}!"
+                          "Awesome! You blended ${currentWord.word}! (+2 ⭐)"
                         },
                       style = MaterialTheme.typography.titleMedium,
                       color = InkNavy,
@@ -593,7 +631,7 @@ fun WordBlenderScreen(
                           currentWord.phonemes.forEachIndexed { idx, ch ->
                             highlightedPhonemeIdx = idx
                             PhonicsCurriculum.findByLetter(ch)?.let { audioPlayer.speakPhonemeOnly(it) }
-                            delay(500L)
+                            delay(720L)
                           }
                           highlightedPhonemeIdx = -1
                           audioPlayer.speakWord(currentWord.word, languageMode)
@@ -643,7 +681,7 @@ fun WordBlenderScreen(
                         currentWord.phonemes.forEachIndexed { idx, ch ->
                           highlightedPhonemeIdx = idx
                           PhonicsCurriculum.findByLetter(ch)?.let { audioPlayer.speakPhonemeOnly(it) }
-                          delay(520L)
+                          delay(720L)
                         }
                         highlightedPhonemeIdx = -1
                         audioPlayer.speakWord(currentWord.word, languageMode)

@@ -1,15 +1,14 @@
 package com.example.feature.stages
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -23,14 +22,17 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowBack
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.automirrored.rounded.VolumeUp
-import androidx.compose.material.icons.rounded.AutoAwesome
+import androidx.compose.material.icons.rounded.CheckCircle
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
@@ -39,6 +41,7 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -66,15 +69,15 @@ import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
 import com.example.ui.theme.MintGreen
-import com.example.ui.theme.PlumPurple
 import com.example.ui.theme.SkyTeal
 import com.example.ui.theme.SunshineAmber
+import kotlin.random.Random
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun UkgStageScreen(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit = {},
   onBack: () -> Unit,
   modifier: Modifier = Modifier,
 ) {
@@ -146,9 +149,19 @@ fun UkgStageScreen(
         }
 
         when (selectedTab) {
-          0 -> WordFamiliesTab(languageMode = languageMode, audioPlayer = audioPlayer)
+          0 ->
+            WordFamiliesTab(
+              languageMode = languageMode,
+              audioPlayer = audioPlayer,
+              onAwardStars = onAwardStars,
+            )
           1 -> DigraphsTab(languageMode = languageMode, audioPlayer = audioPlayer)
-          else -> MagicETab(languageMode = languageMode, audioPlayer = audioPlayer)
+          else ->
+            MagicETab(
+              languageMode = languageMode,
+              audioPlayer = audioPlayer,
+              onAwardStars = onAwardStars,
+            )
         }
       }
     }
@@ -160,14 +173,48 @@ fun UkgStageScreen(
 private fun WordFamiliesTab(
   languageMode: LanguageMode,
   audioPlayer: PhonicsAudioPlayer,
+  onAwardStars: (Int) -> Unit,
 ) {
   val families = EarlyCurriculumCatalog.wordFamilies
   var familyIdx by remember { mutableIntStateOf(0) }
   val group = families[familyIdx]
 
+  val quizTarget = remember(familyIdx) { group.words[familyIdx % group.words.size] }
+  val quizOptions =
+    remember(familyIdx) {
+      val others = group.words.filter { it.word != quizTarget.word }.shuffled(Random(familyIdx + 9)).take(2)
+      (listOf(quizTarget) + others).shuffled(Random(familyIdx + 3))
+    }
+  var pickedQuizWord by remember(familyIdx) { mutableStateOf<String?>(null) }
+  var quizSolved by remember(familyIdx) { mutableStateOf(false) }
+
   Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      families.forEachIndexed { idx, item ->
+    Row(
+      modifier = Modifier.fillMaxWidth(),
+      verticalAlignment = Alignment.CenterVertically,
+      horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+      Text(
+        text = "8 Word Families",
+        style = MaterialTheme.typography.titleMedium,
+        fontWeight = FontWeight.Bold,
+      )
+      Surface(color = SunshineAmber.copy(alpha = 0.25f), shape = RoundedCornerShape(50)) {
+        Text(
+          text = "Family ${familyIdx + 1} of ${families.size}",
+          style = MaterialTheme.typography.labelLarge,
+          fontWeight = FontWeight.Bold,
+          color = InkNavy,
+          modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+        )
+      }
+    }
+
+    LazyRow(
+      horizontalArrangement = Arrangement.spacedBy(8.dp),
+      contentPadding = PaddingValues(vertical = 2.dp),
+    ) {
+      itemsIndexed(families) { idx, item ->
         FilterChip(
           selected = familyIdx == idx,
           onClick = {
@@ -178,7 +225,7 @@ private fun WordFamiliesTab(
               languageMode = languageMode,
             )
           },
-          label = { Text("${item.ending} family", fontWeight = FontWeight.Bold) },
+          label = { Text("${item.ending} (${item.words.size})", fontWeight = FontWeight.Bold) },
           modifier = Modifier.minimumInteractiveComponentSize(),
         )
       }
@@ -247,250 +294,102 @@ private fun WordFamiliesTab(
         }
       }
     }
-  }
-}
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun DigraphsTab(
-  languageMode: LanguageMode,
-  audioPlayer: PhonicsAudioPlayer,
-) {
-  val digraphs = EarlyCurriculumCatalog.digraphs
-  var selectedIdx by remember { mutableIntStateOf(0) }
-  val item = digraphs[selectedIdx]
-
-  Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      digraphs.forEachIndexed { idx, dg ->
-        FilterChip(
-          selected = selectedIdx == idx,
-          onClick = {
-            selectedIdx = idx
-            audioPlayer.speakSoundToken(dg.soundSyllable, dg.hindiSound, languageMode)
-          },
-          label = { Text("${dg.digraph} (${dg.hindiSound})", fontWeight = FontWeight.Bold) },
-          modifier = Modifier.minimumInteractiveComponentSize(),
-        )
-      }
-    }
-
+    // Quick Family Challenge
     Card(
-      shape = RoundedCornerShape(26.dp),
-      colors = CardDefaults.cardColors(containerColor = SkyTeal),
-      modifier =
-        Modifier
-          .fillMaxWidth()
-          .clickable {
-            audioPlayer.speakBilingualScript(
-              hindiDevanagariScript = item.hindiVoiceScript,
-              englishScript = "${item.digraph} makes ${item.soundSyllable}, as in ${item.exampleWord}.",
-              languageMode = languageMode,
-            )
-          },
-    ) {
-      Column(
-        modifier = Modifier.fillMaxWidth().padding(20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        Text(text = item.emoji, fontSize = 52.sp)
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-          Surface(color = Color.White, shape = RoundedCornerShape(14.dp)) {
-            Text(
-              text = item.digraph,
-              style = MaterialTheme.typography.headlineLarge,
-              fontWeight = FontWeight.ExtraBold,
-              color = CoralPrimary,
-              modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-            )
-          }
-          Text("+", style = MaterialTheme.typography.headlineMedium, color = Color.White)
-          Surface(color = Color.White.copy(alpha = 0.22f), shape = RoundedCornerShape(14.dp)) {
-            Text(
-              text = item.remainingPart,
-              style = MaterialTheme.typography.headlineLarge,
-              fontWeight = FontWeight.Bold,
-              color = Color.White,
-              modifier = Modifier.padding(horizontal = 14.dp, vertical = 6.dp),
-            )
-          }
-          Text("=", style = MaterialTheme.typography.headlineMedium, color = Color.White)
-          Text(
-            text = item.exampleWord,
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.ExtraBold,
-            color = SunshineAmber,
-          )
-        }
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-          text = item.hinglishTip,
-          style = MaterialTheme.typography.bodyMedium,
-          color = Color.White,
-          textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(14.dp))
-        Button(
-          onClick = {
-            audioPlayer.speakBilingualScript(
-              hindiDevanagariScript = item.hindiVoiceScript,
-              englishScript = "${item.soundSyllable}! ${item.exampleWord}.",
-              languageMode = languageMode,
-            )
-          },
-          colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = InkNavy),
-          shape = RoundedCornerShape(16.dp),
-          modifier = Modifier.height(48.dp),
-        ) {
-          Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(modifier = Modifier.width(6.dp))
-          Text("Listen Digraph", fontWeight = FontWeight.Bold)
-        }
-      }
-    }
-
-    Text(
-      text = "Tap more '${item.digraph}' words:",
-      style = MaterialTheme.typography.titleMedium,
-    )
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(10.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-      item.moreWords.forEach { word ->
-        Surface(
-          onClick = { audioPlayer.speakWord(word, languageMode) },
-          color = MaterialTheme.colorScheme.surface,
-          shape = RoundedCornerShape(16.dp),
-          modifier =
-            Modifier
-              .minimumInteractiveComponentSize()
-              .border(1.5.dp, SkyTeal.copy(alpha = 0.45f), RoundedCornerShape(16.dp)),
-        ) {
-          Row(
-            modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
-            verticalAlignment = Alignment.CenterVertically,
-          ) {
-            Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = null, tint = SkyTeal, modifier = Modifier.size(18.dp))
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(word, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-          }
-        }
-      }
-    }
-  }
-}
-
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-private fun MagicETab(
-  languageMode: LanguageMode,
-  audioPlayer: PhonicsAudioPlayer,
-) {
-  val pairs = EarlyCurriculumCatalog.magicEWords
-  var pairIdx by remember { mutableIntStateOf(0) }
-  var magicEActive by remember(pairIdx) { mutableStateOf(false) }
-  val pair = pairs[pairIdx]
-
-  val cardBg by animateColorAsState(
-    targetValue = if (magicEActive) PlumPurple else CoralPrimary,
-    label = "magicEBg",
-  )
-
-  Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
-    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-      pairs.forEachIndexed { idx, item ->
-        FilterChip(
-          selected = pairIdx == idx,
-          onClick = { pairIdx = idx },
-          label = { Text("${item.shortWord} → ${item.magicWord}", fontWeight = FontWeight.Bold) },
-          modifier = Modifier.minimumInteractiveComponentSize(),
-        )
-      }
-    }
-
-    Card(
-      shape = RoundedCornerShape(28.dp),
-      colors = CardDefaults.cardColors(containerColor = cardBg),
+      shape = RoundedCornerShape(22.dp),
+      colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
       modifier = Modifier.fillMaxWidth(),
     ) {
-      Column(
-        modifier = Modifier.fillMaxWidth().padding(22.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-      ) {
-        Text(
-          text = if (magicEActive) pair.magicEmoji else pair.shortEmoji,
-          fontSize = 56.sp,
-        )
-        Spacer(modifier = Modifier.height(8.dp))
-        Row(verticalAlignment = Alignment.CenterVertically) {
+      Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Row(
+          modifier = Modifier.fillMaxWidth(),
+          horizontalArrangement = Arrangement.SpaceBetween,
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
           Text(
-            text = pair.shortWord,
-            fontSize = 52.sp,
-            fontWeight = FontWeight.ExtraBold,
-            color = Color.White,
+            text =
+              if (languageMode == LanguageMode.HINGLISH)
+                "Quick Quiz: '${quizTarget.emoji} ${quizTarget.hinglishMeaning}' kaun sa shabd hai?"
+              else "Quick Check: Tap the word for ${quizTarget.emoji} (${quizTarget.hinglishMeaning}):",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.weight(1f),
           )
-          if (magicEActive) {
-            Text(
-              text = "e",
-              fontSize = 52.sp,
-              fontWeight = FontWeight.ExtraBold,
-              color = SunshineAmber,
-            )
+          IconButton(
+            onClick = { audioPlayer.speakWord(quizTarget.word, languageMode) },
+            modifier = Modifier.minimumInteractiveComponentSize(),
+          ) {
+            Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = "Hear word", tint = SkyTeal)
           }
         }
-        Text(
-          text = if (magicEActive) pair.magicMeaning else pair.shortMeaning,
-          style = MaterialTheme.typography.titleMedium,
-          color = Color.White.copy(alpha = 0.94f),
-        )
-        Spacer(modifier = Modifier.height(10.dp))
-        Text(
-          text = pair.hinglishRuleTip,
-          style = MaterialTheme.typography.bodyMedium,
-          color = Color.White.copy(alpha = 0.9f),
-          textAlign = TextAlign.Center,
-        )
-        Spacer(modifier = Modifier.height(18.dp))
-
-        Button(
-          onClick = {
-            magicEActive = !magicEActive
-            if (magicEActive) {
-              audioPlayer.playCelebrationChime()
-              audioPlayer.speakWord(pair.magicWord, languageMode)
-            } else {
-              audioPlayer.playPopSound()
-              audioPlayer.speakWord(pair.shortWord, languageMode)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+          quizOptions.forEach { opt ->
+            val picked = pickedQuizWord == opt.word
+            val isRight = opt.word == quizTarget.word
+            val bg =
+              when {
+                picked && isRight -> MintGreen
+                picked && !isRight -> CoralPrimary
+                else -> MaterialTheme.colorScheme.surfaceVariant
+              }
+            Surface(
+              onClick = {
+                if (!quizSolved) {
+                  pickedQuizWord = opt.word
+                  if (isRight) {
+                    quizSolved = true
+                    onAwardStars(2)
+                    audioPlayer.playCelebrationChime()
+                    audioPlayer.speakWord(opt.word, languageMode)
+                  } else {
+                    audioPlayer.playGentleTryAgain()
+                  }
+                }
+              },
+              color = bg,
+              shape = RoundedCornerShape(14.dp),
+              modifier = Modifier.weight(1f).height(52.dp),
+            ) {
+              Box(contentAlignment = Alignment.Center) {
+                Text(
+                  text = opt.word,
+                  style = MaterialTheme.typography.titleMedium,
+                  fontWeight = FontWeight.Bold,
+                  color = if (picked && !isRight) Color.White else InkNavy,
+                )
+              }
             }
-          },
-          colors = ButtonDefaults.buttonColors(containerColor = SunshineAmber, contentColor = InkNavy),
-          shape = RoundedCornerShape(18.dp),
-          modifier = Modifier.fillMaxWidth().height(52.dp).testTag("toggle_magic_e_button"),
-        ) {
-          Icon(Icons.Rounded.AutoAwesome, contentDescription = null, modifier = Modifier.size(20.dp))
-          Spacer(modifier = Modifier.width(8.dp))
-          Text(
-            text = if (magicEActive) "Remove Magic 'e' (${pair.shortWord})" else "Add Magic 'e' ✨ (${pair.magicWord})",
-            fontWeight = FontWeight.Bold,
-          )
+          }
         }
+        if (quizSolved) {
+          Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Rounded.CheckCircle, contentDescription = null, tint = MintGreen)
+            Text("Shabaash! Sahi shabd chuna! (+2 ⭐)", style = MaterialTheme.typography.labelLarge, color = InkNavy)
+          }
+        }
+      }
+    }
 
-        Spacer(modifier = Modifier.height(10.dp))
-        Button(
-          onClick = {
-            audioPlayer.speakBilingualScript(
-              hindiDevanagariScript = pair.hindiVoiceScript,
-              englishScript = "${pair.shortWord} becomes ${pair.magicWord} with Magic E!",
-              languageMode = languageMode,
-            )
-          },
-          colors = ButtonDefaults.buttonColors(containerColor = Color.White.copy(alpha = 0.2f), contentColor = Color.White),
-          shape = RoundedCornerShape(16.dp),
-          modifier = Modifier.fillMaxWidth().height(48.dp),
-        ) {
-          Icon(Icons.AutoMirrored.Rounded.VolumeUp, contentDescription = null, modifier = Modifier.size(18.dp))
-          Spacer(modifier = Modifier.width(6.dp))
-          Text("Hear Magic Rule", fontWeight = FontWeight.Bold)
-        }
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+      OutlinedButton(
+        onClick = { familyIdx = (familyIdx - 1 + families.size) % families.size },
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
+      ) {
+        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = null, modifier = Modifier.size(18.dp))
+        Spacer(modifier = Modifier.width(6.dp))
+        Text("Prev Family", fontWeight = FontWeight.Bold)
+      }
+      Button(
+        onClick = { familyIdx = (familyIdx + 1) % families.size },
+        colors = ButtonDefaults.buttonColors(containerColor = CoralPrimary),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.weight(1f).height(48.dp),
+      ) {
+        Text("Next Family", fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.width(6.dp))
+        Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
       }
     }
   }
