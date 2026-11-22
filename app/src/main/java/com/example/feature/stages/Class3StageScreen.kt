@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.domain.curriculum.Class3CurriculumCatalog
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -153,6 +154,13 @@ private fun VowelTeamsTab(
     StageCounterAndScoreRow(
       counterText = "Team ${idx + 1} of ${items.size}",
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
+      accentColor = PlumPurple,
+    )
+
+    GrammarTopicRuleCard(
+      rule = GrammarRulesCatalog.class3VowelRule,
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
       accentColor = PlumPurple,
     )
 

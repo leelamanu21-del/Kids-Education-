@@ -65,6 +65,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.domain.curriculum.EarlyCurriculumCatalog
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -231,6 +232,13 @@ private fun WordFamiliesTab(
       }
     }
 
+    GrammarTopicRuleCard(
+      rule = GrammarRulesCatalog.ukgRules[0],
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = SkyTeal,
+    )
+
     Card(
       shape = RoundedCornerShape(22.dp),
       colors = CardDefaults.cardColors(containerColor = SunshineAmber.copy(alpha = 0.22f)),
@@ -392,5 +400,13 @@ private fun WordFamiliesTab(
         Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = null, modifier = Modifier.size(18.dp))
       }
     }
+
+    ExpandableRuleBookCard(
+      title = "UKG Grammar & Spelling Rule Book",
+      rules = GrammarRulesCatalog.ukgRules,
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = SkyTeal,
+    )
   }
 }

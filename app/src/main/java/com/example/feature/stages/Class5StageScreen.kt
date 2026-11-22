@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.domain.curriculum.Class5CurriculumCatalog
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -157,6 +158,15 @@ private fun IdiomsAndProverbsTab(
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
       accentColor = InkNavy,
     )
+
+    GrammarRulesCatalog.class5IdiomRulesByType[item.typeTag]?.let { idiomRule ->
+      GrammarTopicRuleCard(
+        rule = idiomRule,
+        languageMode = languageMode,
+        audioPlayer = audioPlayer,
+        accentColor = InkNavy,
+      )
+    }
 
     Card(
       shape = RoundedCornerShape(24.dp),
@@ -288,6 +298,14 @@ private fun IdiomsAndProverbsTab(
       onPrev = { idx = (idx - 1 + items.size) % items.size },
       onNext = { idx = (idx + 1) % items.size },
     )
+
+    ExpandableRuleBookCard(
+      title = "Idioms, Proverbs & Similes Rule Book",
+      rules = GrammarRulesCatalog.class5IdiomRulesByType.values.toList(),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = InkNavy,
+    )
   }
 }
 
@@ -310,6 +328,15 @@ private fun VoiceAndFiguresTab(
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
       accentColor = PlumPurple,
     )
+
+    GrammarRulesCatalog.class5VoiceAndFigureRulesByTag[item.conceptTag]?.let { voiceRule ->
+      GrammarTopicRuleCard(
+        rule = voiceRule,
+        languageMode = languageMode,
+        audioPlayer = audioPlayer,
+        accentColor = PlumPurple,
+      )
+    }
 
     Card(
       shape = RoundedCornerShape(24.dp),
@@ -426,6 +453,14 @@ private fun VoiceAndFiguresTab(
       accentColor = PlumPurple,
       onPrev = { idx = (idx - 1 + items.size) % items.size },
       onNext = { idx = (idx + 1) % items.size },
+    )
+
+    ExpandableRuleBookCard(
+      title = "Class 5 Voice, Speech & Figures Rule Book",
+      rules = GrammarRulesCatalog.class5VoiceAndFigureRulesByTag.values.toList(),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = PlumPurple,
     )
   }
 }

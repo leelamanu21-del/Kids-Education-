@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.domain.curriculum.EarlyCurriculumCatalog
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -105,6 +106,13 @@ internal fun DigraphsTab(
         )
       }
     }
+
+    GrammarTopicRuleCard(
+      rule = GrammarRulesCatalog.ukgRules[1],
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = SkyTeal,
+    )
 
     Card(
       shape = RoundedCornerShape(26.dp),
@@ -288,6 +296,13 @@ internal fun MagicETab(
         )
       }
     }
+
+    GrammarTopicRuleCard(
+      rule = GrammarRulesCatalog.ukgRules[2],
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = PlumPurple,
+    )
 
     Card(
       shape = RoundedCornerShape(28.dp),

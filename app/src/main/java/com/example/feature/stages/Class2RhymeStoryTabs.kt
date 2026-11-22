@@ -47,6 +47,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.curriculum.UpperCurriculumCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
@@ -88,6 +89,13 @@ internal fun OppositesAndRhymesTab(
         )
       }
     }
+
+    GrammarTopicRuleCard(
+      rule = GrammarRulesCatalog.class2Rules[3],
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = CoralPrimary,
+    )
 
     UpperCurriculumCatalog.opposites.forEach { pair ->
       Card(

@@ -125,4 +125,70 @@ class PhonicsCurriculumTest {
     assertTrue("digraph_th" in ids)
     assertTrue(all.all { it.examples.isNotEmpty() && it.hindiSound.isNotBlank() && it.primaryWord.isNotBlank() })
   }
+
+  @Test
+  fun grammarRulesCatalog_coversEveryLevelTopicWithRuleAndExamples() {
+    val allCollections =
+      listOf(GrammarRulesCatalog.lkgSightWordRule) +
+        GrammarRulesCatalog.ukgRules +
+        GrammarRulesCatalog.class1Rules +
+        GrammarRulesCatalog.class2Rules +
+        listOf(GrammarRulesCatalog.class3VowelRule) +
+        GrammarRulesCatalog.class3AffixRules +
+        GrammarRulesCatalog.class3GrammarRulesByTopic.values +
+        GrammarRulesCatalog.class4VocabRulesByCategory.values +
+        GrammarRulesCatalog.class4MechanicsRulesByTopic.values +
+        GrammarRulesCatalog.class5IdiomRulesByType.values +
+        GrammarRulesCatalog.class5VoiceAndFigureRulesByTag.values
+
+    allCollections.forEach { rule ->
+      assertTrue("Missing titleEn for ${rule.topicTag}", rule.titleEn.isNotBlank())
+      assertTrue("Missing titleHinglish for ${rule.topicTag}", rule.titleHinglish.isNotBlank())
+      assertTrue("Missing ruleEn for ${rule.topicTag}", rule.ruleEn.isNotBlank())
+      assertTrue("Missing ruleHinglish for ${rule.topicTag}", rule.ruleHinglish.isNotBlank())
+      assertTrue("Missing formula for ${rule.topicTag}", rule.formulaOrPattern.isNotBlank())
+      assertTrue("Missing examples for ${rule.topicTag}", rule.examples.size >= 2)
+    }
+
+    assertEquals(3, GrammarRulesCatalog.ukgRules.size)
+    assertEquals(2, GrammarRulesCatalog.class1Rules.size)
+    assertEquals(4, GrammarRulesCatalog.class2Rules.size)
+    assertEquals(3, GrammarRulesCatalog.class3AffixRules.size)
+
+    Class3CurriculumCatalog.affixItems.forEach { item ->
+      assertNotNull(GrammarRulesCatalog.ruleForAffixType(item.ruleType))
+    }
+    Class3CurriculumCatalog.grammarQuizzes.forEach { item ->
+      assertNotNull(
+        "Missing Class 3 grammar rule for topicTag=${item.topicTag}",
+        GrammarRulesCatalog.class3GrammarRulesByTopic[item.topicTag],
+      )
+    }
+
+    Class4CurriculumCatalog.vocabRelations.forEach { item ->
+      assertNotNull(
+        "Missing Class 4 vocab rule for category=${item.category}",
+        GrammarRulesCatalog.class4VocabRulesByCategory[item.category],
+      )
+    }
+    Class4CurriculumCatalog.mechanicsQuizzes.forEach { item ->
+      assertNotNull(
+        "Missing Class 4 mechanics rule for topicTag=${item.topicTag}",
+        GrammarRulesCatalog.class4MechanicsRulesByTopic[item.topicTag],
+      )
+    }
+
+    Class5CurriculumCatalog.idiomsAndProverbs.forEach { item ->
+      assertNotNull(
+        "Missing Class 5 idiom/proverb rule for typeTag=${item.typeTag}",
+        GrammarRulesCatalog.class5IdiomRulesByType[item.typeTag],
+      )
+    }
+    Class5CurriculumCatalog.voiceAndFigures.forEach { item ->
+      assertNotNull(
+        "Missing Class 5 voice/figure rule for conceptTag=${item.conceptTag}",
+        GrammarRulesCatalog.class5VoiceAndFigureRulesByTag[item.conceptTag],
+      )
+    }
+  }
 }

@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.domain.curriculum.Class3CurriculumCatalog
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -65,6 +66,13 @@ internal fun AffixBuilderTab(
     StageCounterAndScoreRow(
       counterText = "Word ${idx + 1} of ${items.size}",
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
+      accentColor = SkyTeal,
+    )
+
+    GrammarTopicRuleCard(
+      rule = GrammarRulesCatalog.ruleForAffixType(item.ruleType),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
       accentColor = SkyTeal,
     )
 
@@ -191,6 +199,14 @@ internal fun AffixBuilderTab(
       onPrev = { idx = (idx - 1 + items.size) % items.size },
       onNext = { idx = (idx + 1) % items.size },
     )
+
+    ExpandableRuleBookCard(
+      title = "Prefix, Suffix & Plural Rule Book",
+      rules = GrammarRulesCatalog.class3AffixRules,
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = SkyTeal,
+    )
   }
 }
 
@@ -213,6 +229,15 @@ internal fun Class3GrammarQuizTab(
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
       accentColor = TangerineOrange,
     )
+
+    GrammarRulesCatalog.class3GrammarRulesByTopic[item.topicTag]?.let { topicRule ->
+      GrammarTopicRuleCard(
+        rule = topicRule,
+        languageMode = languageMode,
+        audioPlayer = audioPlayer,
+        accentColor = TangerineOrange,
+      )
+    }
 
     Card(
       shape = RoundedCornerShape(24.dp),
@@ -327,6 +352,14 @@ internal fun Class3GrammarQuizTab(
       accentColor = TangerineOrange,
       onPrev = { idx = (idx - 1 + items.size) % items.size },
       onNext = { idx = (idx + 1) % items.size },
+    )
+
+    ExpandableRuleBookCard(
+      title = "Class 3 Full Grammar Rule Book",
+      rules = GrammarRulesCatalog.class3GrammarRulesByTopic.values.toList(),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = TangerineOrange,
     )
   }
 }

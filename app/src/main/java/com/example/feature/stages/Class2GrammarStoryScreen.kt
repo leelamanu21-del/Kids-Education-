@@ -58,6 +58,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.curriculum.UpperCurriculumCatalog
 import com.example.domain.model.GrammarCategory
 import com.example.domain.model.LanguageMode
@@ -205,34 +206,14 @@ private fun GrammarTab(
       }
     }
 
-    // Grammar Guide Cards
-    GrammarCategory.entries.forEach { cat ->
-      Surface(
-        color = MaterialTheme.colorScheme.surface,
-        shape = RoundedCornerShape(18.dp),
-        modifier = Modifier.fillMaxWidth().border(1.dp, MaterialTheme.colorScheme.outline, RoundedCornerShape(18.dp)),
-      ) {
-        Row(
-          modifier = Modifier.padding(14.dp),
-          verticalAlignment = Alignment.CenterVertically,
-          horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
-          Text(text = cat.emoji, fontSize = 28.sp)
-          Column {
-            Text(
-              text = if (languageMode == LanguageMode.HINGLISH) cat.titleHinglish else cat.titleEn,
-              style = MaterialTheme.typography.titleMedium,
-              fontWeight = FontWeight.Bold,
-            )
-            Text(
-              text = cat.hintHinglish,
-              style = MaterialTheme.typography.bodySmall,
-              color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-          }
-        }
-      }
-    }
+    ExpandableRuleBookCard(
+      title = "Class 2 Grammar Rules (Noun · Verb · Adjective)",
+      rules = GrammarRulesCatalog.class2Rules.take(3),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = PlumPurple,
+      initiallyExpanded = true,
+    )
 
     Card(
       shape = RoundedCornerShape(24.dp),

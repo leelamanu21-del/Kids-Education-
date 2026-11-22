@@ -53,6 +53,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.core.audio.PhonicsAudioPlayer
 import com.example.domain.curriculum.Class4CurriculumCatalog
+import com.example.domain.curriculum.GrammarRulesCatalog
 import com.example.domain.model.LanguageMode
 import com.example.ui.theme.CoralPrimary
 import com.example.ui.theme.InkNavy
@@ -157,6 +158,15 @@ private fun VocabRelationsTab(
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
       accentColor = CoralPrimary,
     )
+
+    GrammarRulesCatalog.class4VocabRulesByCategory[item.category]?.let { vocabRule ->
+      GrammarTopicRuleCard(
+        rule = vocabRule,
+        languageMode = languageMode,
+        audioPlayer = audioPlayer,
+        accentColor = CoralPrimary,
+      )
+    }
 
     Card(
       shape = RoundedCornerShape(24.dp),
@@ -280,6 +290,14 @@ private fun VocabRelationsTab(
       onPrev = { idx = (idx - 1 + items.size) % items.size },
       onNext = { idx = (idx + 1) % items.size },
     )
+
+    ExpandableRuleBookCard(
+      title = "Synonym, Antonym & Homophone Rule Book",
+      rules = GrammarRulesCatalog.class4VocabRulesByCategory.values.toList(),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = CoralPrimary,
+    )
   }
 }
 
@@ -302,6 +320,15 @@ private fun Class4MechanicsTab(
       scoreText = "Score: ${solvedSet.size} / ${items.size}",
       accentColor = SkyTeal,
     )
+
+    GrammarRulesCatalog.class4MechanicsRulesByTopic[item.topicTag]?.let { mechanicsRule ->
+      GrammarTopicRuleCard(
+        rule = mechanicsRule,
+        languageMode = languageMode,
+        audioPlayer = audioPlayer,
+        accentColor = SkyTeal,
+      )
+    }
 
     Card(
       shape = RoundedCornerShape(24.dp),
@@ -415,6 +442,14 @@ private fun Class4MechanicsTab(
       accentColor = SkyTeal,
       onPrev = { idx = (idx - 1 + items.size) % items.size },
       onNext = { idx = (idx + 1) % items.size },
+    )
+
+    ExpandableRuleBookCard(
+      title = "Class 4 Full Grammar Rule Book",
+      rules = GrammarRulesCatalog.class4MechanicsRulesByTopic.values.toList(),
+      languageMode = languageMode,
+      audioPlayer = audioPlayer,
+      accentColor = SkyTeal,
     )
   }
 }
