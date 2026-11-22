@@ -44,8 +44,12 @@ import com.example.feature.parent.ParentMathGateDialog
 import com.example.feature.parent.ParentZoneScreen
 import com.example.feature.rewards.BadgeUnlockCelebrationDialog
 import com.example.feature.rewards.BadgesScreen
+import com.example.feature.soundboard.SoundboardScreen
 import com.example.feature.stages.Class1FluencyScreen
 import com.example.feature.stages.Class2GrammarStoryScreen
+import com.example.feature.stages.Class3StageScreen
+import com.example.feature.stages.Class4StageScreen
+import com.example.feature.stages.Class5StageScreen
 import com.example.feature.stages.SightWordsScreen
 import com.example.feature.stages.UkgStageScreen
 import com.example.feature.timer.EyeRestBreakScreen
@@ -64,10 +68,14 @@ object PhonicsRoutes {
   const val HOME = "home"
   const val LESSON = "lesson/{letter}"
   const val BLENDER = "blender"
+  const val SOUNDBOARD = "soundboard"
   const val SIGHT_WORDS = "sight_words"
   const val UKG_STAGE = "ukg_stage"
   const val CLASS1_STAGE = "class1_stage"
   const val CLASS2_STAGE = "class2_stage"
+  const val CLASS3_STAGE = "class3_stage"
+  const val CLASS4_STAGE = "class4_stage"
+  const val CLASS5_STAGE = "class5_stage"
   const val REWARDS = "rewards"
   const val PARENT = "parent"
 
@@ -217,10 +225,14 @@ private fun AuthenticatedPhonicsFlow(
           audioPlayer.speakLetterPhoneme(letter, langMode)
         },
         onOpenWordBlender = { navController.navigate(PhonicsRoutes.BLENDER) },
+        onOpenSoundboard = { navController.navigate(PhonicsRoutes.SOUNDBOARD) },
         onOpenSightWords = { navController.navigate(PhonicsRoutes.SIGHT_WORDS) },
         onOpenUkgStage = { navController.navigate(PhonicsRoutes.UKG_STAGE) },
         onOpenClass1Stage = { navController.navigate(PhonicsRoutes.CLASS1_STAGE) },
         onOpenClass2Stage = { navController.navigate(PhonicsRoutes.CLASS2_STAGE) },
+        onOpenClass3Stage = { navController.navigate(PhonicsRoutes.CLASS3_STAGE) },
+        onOpenClass4Stage = { navController.navigate(PhonicsRoutes.CLASS4_STAGE) },
+        onOpenClass5Stage = { navController.navigate(PhonicsRoutes.CLASS5_STAGE) },
         onOpenRewards = { navController.navigate(PhonicsRoutes.REWARDS) },
         onOpenParentZone = { showParentMathGate = true },
         onSignOut = {
@@ -266,6 +278,18 @@ private fun AuthenticatedPhonicsFlow(
         onAwardStars = { stars ->
           homeViewModel.recordStageReward(RewardStageIds.LEVEL_2_BLENDER, stars)
         },
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.SOUNDBOARD) {
+      SoundboardScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onToggleLanguage = homeViewModel::toggleLanguageMode,
         onBack = {
           audioPlayer.stop()
           navController.popBackStack()
@@ -321,6 +345,48 @@ private fun AuthenticatedPhonicsFlow(
         audioPlayer = audioPlayer,
         onAwardStars = { stars ->
           homeViewModel.recordStageReward(RewardStageIds.LEVEL_5_CLASS2, stars)
+        },
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.CLASS3_STAGE) {
+      Class3StageScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_6_CLASS3, stars)
+        },
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.CLASS4_STAGE) {
+      Class4StageScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_7_CLASS4, stars)
+        },
+        onBack = {
+          audioPlayer.stop()
+          navController.popBackStack()
+        },
+      )
+    }
+
+    composable(PhonicsRoutes.CLASS5_STAGE) {
+      Class5StageScreen(
+        languageMode = currentLanguageMode,
+        audioPlayer = audioPlayer,
+        onAwardStars = { stars ->
+          homeViewModel.recordStageReward(RewardStageIds.LEVEL_8_CLASS5, stars)
         },
         onBack = {
           audioPlayer.stop()

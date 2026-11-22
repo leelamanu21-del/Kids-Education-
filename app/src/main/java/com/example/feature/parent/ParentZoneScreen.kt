@@ -72,6 +72,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.core.timer.ScreenTimePreset
 import com.example.core.timer.SessionTimerUiState
+import com.example.domain.curriculum.BadgeCatalog
 import com.example.domain.curriculum.PhonicsCurriculum
 import com.example.domain.model.LanguageMode
 import com.example.domain.model.LearnerProfile
@@ -227,7 +228,7 @@ fun ParentZoneScreen(
   progressByLetter: Map<String, LetterProgress>,
   timerState: SessionTimerUiState,
   unlockedBadgesCount: Int = 0,
-  totalBadgesCount: Int = 13,
+  totalBadgesCount: Int = BadgeCatalog.badges.size,
   onSelectTimerPreset: (ScreenTimePreset) -> Unit,
   onTriggerBreakPreview: () -> Unit,
   onBack: () -> Unit,
@@ -718,7 +719,7 @@ fun buildWhatsAppReportMessage(
   wordsBlendedToday: Int,
   sessionDuration: String,
   unlockedBadgesCount: Int = 0,
-  totalBadgesCount: Int = 13,
+  totalBadgesCount: Int = BadgeCatalog.badges.size,
 ): String {
   val lettersText =
     if (masteredLetters.isEmpty()) "Starting SATPIN Group 1 (S, A, T, P, I, N)"

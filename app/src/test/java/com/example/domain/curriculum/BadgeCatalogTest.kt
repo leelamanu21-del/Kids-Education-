@@ -18,7 +18,7 @@ class BadgeCatalogTest {
         progressByLetter = emptyMap(),
         stageProgress = emptyMap(),
       )
-    assertEquals(13, result.size)
+    assertEquals(16, result.size)
     assertTrue(result.none { it.unlocked })
     assertEquals("Budding Listener", BadgeCatalog.rankFor(0).titleEn)
   }
@@ -74,6 +74,10 @@ class BadgeCatalogTest {
         progressByLetter = allLetters,
         stageProgress = allStages,
       )
+    val byId = result.associateBy { it.badge.id }
+    assertTrue(byId.getValue("class3_vocab_ace").unlocked)
+    assertTrue(byId.getValue("class4_word_scholar").unlocked)
+    assertTrue(byId.getValue("class5_master_graduate").unlocked)
     assertTrue(result.all { it.unlocked })
     assertEquals("BolBuddy Legend", BadgeCatalog.rankFor(result.size).titleEn)
   }

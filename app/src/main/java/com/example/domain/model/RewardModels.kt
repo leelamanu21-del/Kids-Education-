@@ -6,6 +6,9 @@ object RewardStageIds {
   const val LEVEL_3_UKG = "level3_ukg"
   const val LEVEL_4_CLASS1 = "level4_class1"
   const val LEVEL_5_CLASS2 = "level5_class2"
+  const val LEVEL_6_CLASS3 = "level6_class3"
+  const val LEVEL_7_CLASS4 = "level7_class4"
+  const val LEVEL_8_CLASS5 = "level8_class5"
 
   val ALL =
     setOf(
@@ -14,12 +17,15 @@ object RewardStageIds {
       LEVEL_3_UKG,
       LEVEL_4_CLASS1,
       LEVEL_5_CLASS2,
+      LEVEL_6_CLASS3,
+      LEVEL_7_CLASS4,
+      LEVEL_8_CLASS5,
     )
 }
 
 enum class BadgeCategory(val titleEn: String, val titleHinglish: String) {
   PHONICS_PATH("Phonics Path (Level 1)", "Phonics Path (Level 1)"),
-  COURSE_STAGES("Course Adventures (Levels 2–5)", "Course Levels (2–5)"),
+  COURSE_STAGES("Course Adventures (Levels 2–8)", "Course Levels (2–8)"),
   STAR_TIERS("Star Milestones", "Star Champion Tiers"),
 }
 

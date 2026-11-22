@@ -73,5 +73,56 @@ class PhonicsCurriculumTest {
       it.blankCorrectIndex in it.blankOptions.indices &&
         it.comprehensionCorrectIndex in it.comprehensionOptions.indices
     })
+
+    // Class 3 (Level 6)
+    assertEquals(10, Class3CurriculumCatalog.vowelTeams.size)
+    assertTrue(Class3CurriculumCatalog.vowelTeams.all { it.correctIndex in it.quizOptions.indices && it.sampleWords.size >= 5 })
+    assertEquals(12, Class3CurriculumCatalog.affixItems.size)
+    assertTrue(Class3CurriculumCatalog.affixItems.all { it.correctIndex in it.quizOptions.indices })
+    assertEquals(12, Class3CurriculumCatalog.grammarQuizzes.size)
+    assertTrue(Class3CurriculumCatalog.grammarQuizzes.all { it.correctIndex in it.options.indices })
+
+    // Class 4 (Level 7)
+    assertEquals(14, Class4CurriculumCatalog.vocabRelations.size)
+    assertTrue(Class4CurriculumCatalog.vocabRelations.all { it.correctIndex in it.quizOptions.indices })
+    assertEquals(12, Class4CurriculumCatalog.mechanicsQuizzes.size)
+    assertTrue(Class4CurriculumCatalog.mechanicsQuizzes.all { it.correctIndex in it.options.indices })
+    assertEquals(5, Class4CurriculumCatalog.readingPassages.size)
+    assertTrue(Class4CurriculumCatalog.readingPassages.all {
+      it.paragraphs.isNotEmpty() &&
+        it.vocabulary.isNotEmpty() &&
+        it.correctIndex1 in it.options1.indices &&
+        it.correctIndex2 in it.options2.indices
+    })
+
+    // Class 5 (Level 8)
+    assertEquals(12, Class5CurriculumCatalog.idiomsAndProverbs.size)
+    assertTrue(Class5CurriculumCatalog.idiomsAndProverbs.all { it.correctIndex in it.quizOptions.indices })
+    assertEquals(12, Class5CurriculumCatalog.voiceAndFigures.size)
+    assertTrue(Class5CurriculumCatalog.voiceAndFigures.all { it.correctIndex in it.options.indices })
+    assertEquals(5, Class5CurriculumCatalog.criticalPassages.size)
+    assertTrue(Class5CurriculumCatalog.criticalPassages.all {
+      it.paragraphs.isNotEmpty() &&
+        it.vocabulary.isNotEmpty() &&
+        it.correctIndex1 in it.options1.indices &&
+        it.correctIndex2 in it.options2.indices
+    })
+  }
+
+  @Test
+  fun soundboardCatalog_coversLettersDigraphsBlendsAndVowelTeams() {
+    val all = SoundboardCatalog.allTiles
+    assertEquals(57, all.size)
+    assertEquals(57, all.map { it.id }.toSet().size)
+    assertEquals(26, SoundboardCatalog.tilesFor(SoundboardCategory.LETTERS).size)
+    assertEquals(9, SoundboardCatalog.tilesFor(SoundboardCategory.DIGRAPHS).size)
+    assertEquals(12, SoundboardCatalog.tilesFor(SoundboardCategory.BLENDS).size)
+    assertEquals(10, SoundboardCatalog.tilesFor(SoundboardCategory.VOWEL_TEAMS).size)
+
+    val ids = all.map { it.id }.toSet()
+    assertTrue("digraph_sh" in ids)
+    assertTrue("digraph_ch" in ids)
+    assertTrue("digraph_th" in ids)
+    assertTrue(all.all { it.examples.isNotEmpty() && it.hindiSound.isNotBlank() && it.primaryWord.isNotBlank() })
   }
 }

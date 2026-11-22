@@ -125,7 +125,10 @@
             "level2_sight_words",
             "level3_ukg",
             "level4_class1",
-            "level5_class2"
+            "level5_class2",
+            "level6_class3",
+            "level7_class4",
+            "level8_class5"
           ],
           "description": "Course stage identifier."
         },

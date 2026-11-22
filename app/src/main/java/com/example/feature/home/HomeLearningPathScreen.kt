@@ -51,6 +51,7 @@ import androidx.compose.material.icons.rounded.AutoAwesome
 import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.EmojiEvents
 import androidx.compose.material.icons.rounded.Explore
+import androidx.compose.material.icons.rounded.GraphicEq
 import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Star
@@ -127,10 +128,14 @@ fun HomeLearningPathScreen(
   onLetterClick: (PhonicsLetter) -> Unit,
   onSpeakLetter: (PhonicsLetter, LanguageMode) -> Unit,
   onOpenWordBlender: () -> Unit,
+  onOpenSoundboard: () -> Unit = {},
   onOpenSightWords: () -> Unit,
   onOpenUkgStage: () -> Unit,
   onOpenClass1Stage: () -> Unit,
   onOpenClass2Stage: () -> Unit,
+  onOpenClass3Stage: () -> Unit = {},
+  onOpenClass4Stage: () -> Unit = {},
+  onOpenClass5Stage: () -> Unit = {},
   onOpenRewards: () -> Unit = {},
   onOpenParentZone: () -> Unit,
   onSignOut: () -> Unit,
@@ -261,20 +266,25 @@ fun HomeLearningPathScreen(
                   languageMode = uiState.languageMode,
                   onContinueClick = { onLetterClick(uiState.nextRecommendedLetter) },
                   onOpenWordBlender = onOpenWordBlender,
+                  onOpenSoundboard = onOpenSoundboard,
                 )
               }
 
-              // 2b. LKG to Class 2 Course Path
+              // 2b. LKG to Class 5 Course Path
               item(span = { GridItemSpan(maxLineSpan) }) {
                 CourseRoadmapSection(
                   languageMode = uiState.languageMode,
                   masteredCount = uiState.masteredCount,
                   stageProgressById = uiState.stageProgressById,
+                  onOpenSoundboard = onOpenSoundboard,
                   onOpenSightWords = onOpenSightWords,
                   onOpenWordBlender = onOpenWordBlender,
                   onOpenUkgStage = onOpenUkgStage,
                   onOpenClass1Stage = onOpenClass1Stage,
                   onOpenClass2Stage = onOpenClass2Stage,
+                  onOpenClass3Stage = onOpenClass3Stage,
+                  onOpenClass4Stage = onOpenClass4Stage,
+                  onOpenClass5Stage = onOpenClass5Stage,
                 )
               }
 
@@ -703,6 +713,7 @@ private fun HeroLearningBanner(
   languageMode: LanguageMode,
   onContinueClick: () -> Unit,
   onOpenWordBlender: () -> Unit,
+  onOpenSoundboard: () -> Unit,
 ) {
   Card(
     shape = RoundedCornerShape(28.dp),
@@ -735,6 +746,38 @@ private fun HeroLearningBanner(
               )
             )
       )
+
+      // Top left Soundboard CTA pill
+      Surface(
+        onClick = onOpenSoundboard,
+        color = SkyTeal,
+        shape = RoundedCornerShape(50),
+        shadowElevation = 4.dp,
+        modifier =
+          Modifier
+            .align(Alignment.TopStart)
+            .padding(14.dp)
+            .minimumInteractiveComponentSize()
+            .testTag("open_soundboard_button"),
+      ) {
+        Row(
+          modifier = Modifier.padding(horizontal = 14.dp, vertical = 10.dp),
+          verticalAlignment = Alignment.CenterVertically,
+        ) {
+          Icon(
+            imageVector = Icons.Rounded.GraphicEq,
+            contentDescription = null,
+            tint = Color.White,
+            modifier = Modifier.size(18.dp),
+          )
+          Spacer(modifier = Modifier.width(6.dp))
+          Text(
+            text = "Soundboard",
+            style = MaterialTheme.typography.labelLarge,
+            color = Color.White,
+          )
+        }
+      }
 
       // Top right Word Blender CTA pill
       Surface(

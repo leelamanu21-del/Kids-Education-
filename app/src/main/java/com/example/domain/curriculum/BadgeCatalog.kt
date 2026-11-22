@@ -125,6 +125,39 @@ object BadgeCatalog {
         palette = TilePalette.MINT,
       ),
       DigitalBadge(
+        id = "class3_vocab_ace",
+        emoji = "🧭",
+        titleEn = "Class 3 Vocab Explorer",
+        titleHinglish = "Class 3 Shabd Explorer",
+        descriptionEn = "Complete 3 Vowel Team, Prefix, or Tense tasks in Level 6",
+        descriptionHinglish = "Level 6 Class 3 mein 3 Vowel, Prefix ya Tense tasks jeetein",
+        category = BadgeCategory.COURSE_STAGES,
+        targetProgress = 3,
+        palette = TilePalette.SKY_TEAL,
+      ),
+      DigitalBadge(
+        id = "class4_word_scholar",
+        emoji = "📝",
+        titleEn = "Class 4 Word Scholar",
+        titleHinglish = "Class 4 Comprehension Star",
+        descriptionEn = "Complete 3 Homophone, Grammar, or Reading tasks in Level 7",
+        descriptionHinglish = "Level 7 Class 4 mein 3 Homophone ya Passage tasks jeetein",
+        category = BadgeCategory.COURSE_STAGES,
+        targetProgress = 3,
+        palette = TilePalette.CORAL,
+      ),
+      DigitalBadge(
+        id = "class5_master_graduate",
+        emoji = "🎓",
+        titleEn = "Class 5 Master Graduate",
+        titleHinglish = "Class 5 Master Graduate",
+        descriptionEn = "Complete 3 Idioms, Voice, or Writing Workshop tasks in Level 8",
+        descriptionHinglish = "Level 8 Class 5 mein 3 Idioms, Voice ya Story tasks jeetein",
+        category = BadgeCategory.COURSE_STAGES,
+        targetProgress = 3,
+        palette = TilePalette.PLUM,
+      ),
+      DigitalBadge(
         id = "stars_15",
         emoji = "⭐",
         titleEn = "Rising Star",
@@ -188,6 +221,12 @@ object BadgeCatalog {
             (stageProgress[RewardStageIds.LEVEL_4_CLASS1]?.completionsCount ?: 0L).toInt()
           "class2_story_hero" ->
             (stageProgress[RewardStageIds.LEVEL_5_CLASS2]?.completionsCount ?: 0L).toInt()
+          "class3_vocab_ace" ->
+            (stageProgress[RewardStageIds.LEVEL_6_CLASS3]?.completionsCount ?: 0L).toInt()
+          "class4_word_scholar" ->
+            (stageProgress[RewardStageIds.LEVEL_7_CLASS4]?.completionsCount ?: 0L).toInt()
+          "class5_master_graduate" ->
+            (stageProgress[RewardStageIds.LEVEL_8_CLASS5]?.completionsCount ?: 0L).toInt()
           "stars_15", "stars_45", "stars_90" -> starsInt
           else -> 0
         }.coerceIn(0, badge.targetProgress)
@@ -202,13 +241,13 @@ object BadgeCatalog {
 
   fun rankFor(unlockedBadgesCount: Int): LearnerRank =
     when {
-      unlockedBadgesCount >= 11 ->
+      unlockedBadgesCount >= 14 ->
         LearnerRank(
           titleEn = "BolBuddy Legend",
           titleHinglish = "BolBuddy Maha-Champion",
           emoji = "👑",
         )
-      unlockedBadgesCount >= 8 ->
+      unlockedBadgesCount >= 10 ->
         LearnerRank(
           titleEn = "Story Star",
           titleHinglish = "Kahani Sitara",

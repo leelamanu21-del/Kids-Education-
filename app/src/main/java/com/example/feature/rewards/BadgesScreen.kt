@@ -82,7 +82,7 @@ private enum class RewardFilter(val labelEn: String, val labelHinglish: String) 
   ALL("All", "Sabhi"),
   UNLOCKED("Unlocked", "Jeete Hue"),
   LEVEL_1("Level 1", "Level 1"),
-  COURSE("Levels 2–5", "Levels 2–5"),
+  COURSE("Levels 2–8", "Levels 2–8"),
   STARS("Star Tiers", "Star Tiers"),
 }
 

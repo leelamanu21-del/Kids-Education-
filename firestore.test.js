@@ -215,6 +215,22 @@ test("Owner can create, update, and list stage_progress while cross-user and inv
       .get()
   );
 
+  await assertSucceeds(
+    aliceDb
+      .collection("users")
+      .doc(ALICE_UID)
+      .collection("stage_progress")
+      .doc("level8_class5")
+      .set({
+        userId: ALICE_UID,
+        stageId: "level8_class5",
+        starsEarned: 5,
+        completionsCount: 2,
+        createdAt: pastTime,
+        updatedAt: pastTime,
+      })
+  );
+
   await assertFails(
     aliceDb
       .collection("users")
