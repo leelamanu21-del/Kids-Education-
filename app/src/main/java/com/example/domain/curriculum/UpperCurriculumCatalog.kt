@@ -15,7 +15,7 @@ object UpperCurriculumCatalog {
     listOf(
       BlendClusterItem(
         blend = "bl",
-        spokenBlend = "bluh",
+        spokenBlend = "blah",
         exampleWord = "blue",
         remainingPart = "ue",
         emoji = "💙",
@@ -25,7 +25,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "gr",
-        spokenBlend = "gruh",
+        spokenBlend = "grah",
         exampleWord = "green",
         remainingPart = "een",
         emoji = "💚",
@@ -35,7 +35,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "st",
-        spokenBlend = "stuh",
+        spokenBlend = "stah",
         exampleWord = "star",
         remainingPart = "ar",
         emoji = "⭐",
@@ -45,7 +45,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "fr",
-        spokenBlend = "fruh",
+        spokenBlend = "frah",
         exampleWord = "frog",
         remainingPart = "og",
         emoji = "🐸",
@@ -55,7 +55,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "cl",
-        spokenBlend = "kluh",
+        spokenBlend = "klah",
         exampleWord = "clap",
         remainingPart = "ap",
         emoji = "👏",
@@ -65,7 +65,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "tr",
-        spokenBlend = "truh",
+        spokenBlend = "trah",
         exampleWord = "train",
         remainingPart = "ain",
         emoji = "🚂",
@@ -75,7 +75,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "br",
-        spokenBlend = "bruh",
+        spokenBlend = "brah",
         exampleWord = "bread",
         remainingPart = "ead",
         emoji = "🍞",
@@ -85,7 +85,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "cr",
-        spokenBlend = "kruh",
+        spokenBlend = "krah",
         exampleWord = "crab",
         remainingPart = "ab",
         emoji = "🦀",
@@ -95,7 +95,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "dr",
-        spokenBlend = "druh",
+        spokenBlend = "drah",
         exampleWord = "drum",
         remainingPart = "um",
         emoji = "🥁",
@@ -105,7 +105,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "fl",
-        spokenBlend = "fluh",
+        spokenBlend = "flah",
         exampleWord = "flower",
         remainingPart = "ower",
         emoji = "🌸",
@@ -115,7 +115,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "pl",
-        spokenBlend = "pluh",
+        spokenBlend = "plah",
         exampleWord = "plane",
         remainingPart = "ane",
         emoji = "✈️",
@@ -125,7 +125,7 @@ object UpperCurriculumCatalog {
       ),
       BlendClusterItem(
         blend = "sp",
-        spokenBlend = "spuh",
+        spokenBlend = "spah",
         exampleWord = "spoon",
         remainingPart = "oon",
         emoji = "🥄",

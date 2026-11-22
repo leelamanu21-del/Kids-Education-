@@ -307,7 +307,7 @@ object EarlyCurriculumCatalog {
     listOf(
       DigraphItem(
         digraph = "sh",
-        soundSyllable = "shuh",
+        soundSyllable = "shh",
         hindiSound = "श",
         exampleWord = "ship",
         remainingPart = "ip",
@@ -318,7 +318,7 @@ object EarlyCurriculumCatalog {
       ),
       DigraphItem(
         digraph = "ch",
-        soundSyllable = "chuh",
+        soundSyllable = "chah",
         hindiSound = "च",
         exampleWord = "chair",
         remainingPart = "air",
@@ -329,7 +329,7 @@ object EarlyCurriculumCatalog {
       ),
       DigraphItem(
         digraph = "th",
-        soundSyllable = "thuh",
+        soundSyllable = "thah",
         hindiSound = "थ",
         exampleWord = "thumb",
         remainingPart = "umb",
@@ -340,7 +340,7 @@ object EarlyCurriculumCatalog {
       ),
       DigraphItem(
         digraph = "ph",
-        soundSyllable = "fuh",
+        soundSyllable = "fff",
         hindiSound = "फ़",
         exampleWord = "phone",
         remainingPart = "one",
@@ -351,7 +351,7 @@ object EarlyCurriculumCatalog {
       ),
       DigraphItem(
         digraph = "wh",
-        soundSyllable = "wuh",
+        soundSyllable = "wah",
         hindiSound = "व",
         exampleWord = "whale",
         remainingPart = "ale",
@@ -362,7 +362,7 @@ object EarlyCurriculumCatalog {
       ),
       DigraphItem(
         digraph = "ck",
-        soundSyllable = "kuh",
+        soundSyllable = "kah",
         hindiSound = "क",
         exampleWord = "duck",
         remainingPart = "du",
@@ -384,7 +384,7 @@ object EarlyCurriculumCatalog {
       ),
       DigraphItem(
         digraph = "qu",
-        soundSyllable = "kwuh",
+        soundSyllable = "kwah",
         hindiSound = "क्व",
         exampleWord = "queen",
         remainingPart = "een",

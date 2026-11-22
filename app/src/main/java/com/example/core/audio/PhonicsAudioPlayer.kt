@@ -393,99 +393,42 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
     }
   }
 
-  private fun spokenEnglishSound(letter: PhonicsLetter): String =
-    when (letter.letter.uppercase(Locale.ROOT)) {
-      "S" -> "sss"
-      "A" -> "aaah"
-      "T" -> "tuh"
-      "P" -> "puh"
-      "I" -> "ihh"
-      "N" -> "nnn"
-      "C" -> "kuh"
-      "K" -> "kuh"
-      "E" -> "ehh"
-      "H" -> "huh"
-      "R" -> "rrr"
-      "M" -> "mmm"
-      "D" -> "duh"
-      "G" -> "guh"
-      "O" -> "aww"
-      "U" -> "uhh"
-      "L" -> "lll"
-      "F" -> "fff"
-      "B" -> "buh"
-      "J" -> "juh"
-      "Z" -> "zzz"
-      "W" -> "wuh"
-      "V" -> "vvv"
-      "Y" -> "yuh"
-      "X" -> "eks"
-      "Q" -> "kwuh"
-      else -> letter.phonemeSpeech
-    }
+  internal fun spokenEnglishSound(letter: PhonicsLetter): String =
+    spokenEnglishSoundForLetter(letter.letter, letter.phonemeSpeech)
 
-  private fun hinglishPureSound(letter: PhonicsLetter): String =
-    when (letter.letter.uppercase(Locale.ROOT)) {
-      "S" -> "स"
-      "A" -> "ऐ"
-      "T" -> "ट"
-      "P" -> "प"
-      "I" -> "इ"
-      "N" -> "न"
-      "C" -> "क"
-      "K" -> "क"
-      "E" -> "ए"
-      "H" -> "ह"
-      "R" -> "र"
-      "M" -> "म"
-      "D" -> "ड"
-      "G" -> "ग"
-      "O" -> "ऑ"
-      "U" -> "अ"
-      "L" -> "ल"
-      "F" -> "फ़"
-      "B" -> "ब"
-      "J" -> "ज"
-      "Z" -> "ज़"
-      "W" -> "व"
-      "V" -> "व"
-      "Y" -> "य"
-      "X" -> "क्स"
-      "Q" -> "क्व"
-      else -> letter.phonemeSpeech
-    }
+  internal fun hinglishPureSound(letter: PhonicsLetter): String =
+    hinglishPureSoundForLetter(letter.letter, letter.phonemeSpeech)
 
   private fun blendHindiCue(spokenSyllable: String): String? =
     when (spokenSyllable.lowercase(Locale.ROOT)) {
-      "bluh" -> "ब्ल"
-      "gruh" -> "ग्र"
-      "stuh" -> "स्ट"
-      "fruh" -> "फ्र"
-      "kluh" -> "क्ल"
-      "truh" -> "ट्र"
-      "bruh" -> "ब्र"
-      "kruh" -> "क्र"
-      "druh" -> "ड्र"
-      "fluh" -> "फ़्ल"
-      "pluh" -> "प्ल"
-      "spuh" -> "स्प"
+      "blah", "bluh" -> "ब्ल"
+      "grah", "gruh" -> "ग्र"
+      "stah", "stuh" -> "स्ट"
+      "frah", "fuh", "fruh" -> "फ़्र"
+      "klah", "kluh" -> "क्ल"
+      "trah", "truh" -> "ट्र"
+      "brah", "bruh" -> "ब्र"
+      "krah", "kruh" -> "क्र"
+      "drah", "druh" -> "ड्र"
+      "flah", "fluh" -> "फ़्ल"
+      "plah", "pluh" -> "प्ल"
+      "spah", "spuh" -> "स्प"
       else -> null
     }
 
   private fun buildHinglishLetterSegments(letter: PhonicsLetter): List<SpeechSegment> {
     val sound = hinglishPureSound(letter)
     val spokenLetterName = hindiSpokenLetterName(letter.letter)
-    val hindiWord = letter.hindiScriptWord
     val englishWord = letter.exampleWord
     return listOf(
-      SpeechSegment(text = "$sound.", speechRate = PHONEME_SPEECH_RATE, pauseAfterMs = 280L),
+      SpeechSegment(text = "$sound.", speechRate = PHONEME_SPEECH_RATE, pauseAfterMs = 260L),
       SpeechSegment(
         text = "$spokenLetterName की आवाज़ होती है, $sound.",
         speechRate = SENTENCE_SPEECH_RATE,
-        pauseAfterMs = 240L,
+        pauseAfterMs = 220L,
       ),
       SpeechSegment(
-        text = "जैसे, $hindiWord, और $englishWord.",
+        text = "जैसे, $englishWord.",
         speechRate = WORD_SPEECH_RATE,
       ),
     )
@@ -603,16 +546,81 @@ class PhonicsAudioPlayer(context: Context) : TextToSpeech.OnInitListener {
     isReady = false
   }
 
-  private companion object {
+  internal companion object {
     const val TAG = "PhonicsAudioPlayer"
     const val GOOGLE_TTS_PACKAGE = "com.google.android.tts"
     const val DEFAULT_PITCH = 0.96f
-    const val SENTENCE_SPEECH_RATE = 0.74f
-    const val WORD_SPEECH_RATE = 0.68f
-    const val PHONEME_SPEECH_RATE = 0.62f
+    const val SENTENCE_SPEECH_RATE = 0.76f
+    const val WORD_SPEECH_RATE = 0.70f
+    const val PHONEME_SPEECH_RATE = 0.72f
     val WARM_FEMALE_VOICE_HINTS =
       listOf("ena", "enc", "ene", "hia", "hic", "hie", "female", "woman")
     val NATURAL_INDIAN_VOICE_HINTS =
       listOf("end", "ahp", "hid", "en-in", "hi-in")
+
+    internal fun spokenEnglishSoundForLetter(letter: String, fallback: String): String =
+      when (letter.uppercase(Locale.ROOT)) {
+        "S" -> "sss"
+        "A" -> "ah"
+        "T" -> "tah"
+        "P" -> "pah"
+        "I" -> "ih"
+        "N" -> "nnn"
+        "C" -> "kah"
+        "K" -> "kah"
+        "E" -> "eh"
+        "H" -> "hah"
+        "R" -> "rrr"
+        "M" -> "mmm"
+        "D" -> "dah"
+        "G" -> "gah"
+        "O" -> "aw"
+        "U" -> "uh"
+        "L" -> "lll"
+        "F" -> "fff"
+        "B" -> "bah"
+        "J" -> "jah"
+        "Z" -> "zzz"
+        "W" -> "wah"
+        "V" -> "vvv"
+        "Y" -> "yah"
+        "X" -> "eks"
+        "Q" -> "kwah"
+        else -> fallback
+      }
+
+    internal fun hinglishPureSoundForLetter(letter: String, fallback: String): String =
+      when (letter.uppercase(Locale.ROOT)) {
+        "S" -> "स"
+        "A" -> "ऐ"
+        "T" -> "ट"
+        "P" -> "प"
+        "I" -> "इ"
+        "N" -> "न"
+        "C" -> "क"
+        "K" -> "क"
+        "E" -> "ए"
+        "H" -> "ह"
+        "R" -> "र"
+        "M" -> "म"
+        "D" -> "ड"
+        "G" -> "ग"
+        "O" -> "ऑ"
+        "U" -> "अ"
+        "L" -> "ल"
+        "F" -> "फ़"
+        "B" -> "ब"
+        "J" -> "ज"
+        "Z" -> "ज़"
+        "W" -> "व"
+        "V" -> "व"
+        "Y" -> "य"
+        "X" -> "क्स"
+        "Q" -> "क्व"
+        else -> fallback
+      }
+
+    internal fun buildHinglishExampleClause(letter: PhonicsLetter): String =
+      "जैसे, ${letter.exampleWord}."
   }
 }

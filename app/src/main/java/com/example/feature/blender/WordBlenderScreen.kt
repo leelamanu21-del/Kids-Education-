@@ -192,8 +192,10 @@ fun WordBlenderScreen(
         scope.launch {
           currentWord.phonemes.forEachIndexed { idx, ch ->
             highlightedPhonemeIdx = idx
-            PhonicsCurriculum.findByLetter(ch)?.let { audioPlayer.speakPhonemeOnly(it) }
-            delay(720L)
+            PhonicsCurriculum.findByLetter(ch)?.let {
+              audioPlayer.speakPhonemeOnly(it, languageMode)
+            }
+            delay(820L)
           }
           highlightedPhonemeIdx = -1
           audioPlayer.playCelebrationChime()
@@ -226,7 +228,7 @@ fun WordBlenderScreen(
     roundError = false
     PhonicsCurriculum.findByLetter(tile.letter)?.let {
       activeTipLetter = it
-      audioPlayer.speakPhonemeOnly(it)
+      audioPlayer.speakPhonemeOnly(it, languageMode)
     }
     evaluateWordIfReady()
   }
@@ -630,8 +632,10 @@ fun WordBlenderScreen(
                         scope.launch {
                           currentWord.phonemes.forEachIndexed { idx, ch ->
                             highlightedPhonemeIdx = idx
-                            PhonicsCurriculum.findByLetter(ch)?.let { audioPlayer.speakPhonemeOnly(it) }
-                            delay(720L)
+                            PhonicsCurriculum.findByLetter(ch)?.let {
+                              audioPlayer.speakPhonemeOnly(it, languageMode)
+                            }
+                            delay(820L)
                           }
                           highlightedPhonemeIdx = -1
                           audioPlayer.speakWord(currentWord.word, languageMode)
@@ -680,8 +684,10 @@ fun WordBlenderScreen(
                       scope.launch {
                         currentWord.phonemes.forEachIndexed { idx, ch ->
                           highlightedPhonemeIdx = idx
-                          PhonicsCurriculum.findByLetter(ch)?.let { audioPlayer.speakPhonemeOnly(it) }
-                          delay(720L)
+                          PhonicsCurriculum.findByLetter(ch)?.let {
+                            audioPlayer.speakPhonemeOnly(it, languageMode)
+                          }
+                          delay(820L)
                         }
                         highlightedPhonemeIdx = -1
                         audioPlayer.speakWord(currentWord.word, languageMode)
